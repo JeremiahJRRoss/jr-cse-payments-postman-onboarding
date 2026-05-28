@@ -6,10 +6,10 @@ working implementation for the Postman CSE take-home exercise.
 Companion repo (adaptation analysis): **loan-origination-postman-onboarding**.
 
 > **Status:** Workflow verified working end-to-end against the open-alpha
-> `postman-cs/postman-api-onboarding-action@v0`. Four sections marked
-> `<!-- TODO -->` need observed values once the workflow has run in your
-> environment. See `SETUP.md` for the verified setup path (~20 minutes) and
-> `BLUEPRINT.md` / `PROMPTS.md` for the iterative build approach.
+> `postman-cs/postman-api-onboarding-action@v0`. First green run after a clean
+> rebuild took 38 seconds (vs. four iterations during initial discovery — see
+> §11). Sections marked `TODO` need screenshot evidence captured during your
+> validation pass.
 
 ---
 
@@ -21,8 +21,15 @@ orchestrator action. One push triggers the entire chain — workspace creation,
 spec upload, collection generation, environment setup, mock and monitor
 creation, and a commit-back of the generated artifacts.
 
-Two repo-level secrets and a customer-side fallback token drive the workflow;
-two repo variables hold identity values that would otherwise be hardcoded.
+Three repo-level secrets and two repo variables drive the workflow:
+
+| Type | Name | Purpose |
+|---|---|---|
+| Secret | `POSTMAN_API_KEY` | Long-lived PMAK (Postman web UI → Settings) |
+| Secret | `POSTMAN_ACCESS_TOKEN` | Session-scoped token extracted from `~/.postman/postmanrc` after `postman login` — required for Bifrost git-sync, governance, and system-env steps |
+| Secret | `GH_FALLBACK_TOKEN` | Fine-grained PAT with Contents/Workflows/Actions/Variables write — required because default `GITHUB_TOKEN` can't write to `.github/workflows/` |
+| Variable | `REQUESTER_EMAIL` | Workspace audit metadata |
+| Variable | `POSTMAN_USER_ID` | Numeric Postman user ID for workspace admin assignment |
 
 ## 2. Services Onboarded
 
@@ -66,16 +73,6 @@ The action chain works in three phases:
    `gh-fallback-token` PAT — not the default `GITHUB_TOKEN`, which can't write
    to `.github/workflows/` by design), and writes the generated CI test workflow
    (`payments-tests.yml`).
-
-Five inputs feed into this — three from secrets, two from variables:
-
-| Source | Name | Purpose |
-|---|---|---|
-| Secret | `POSTMAN_API_KEY` | Long-lived PMAK (Postman web UI → Settings) |
-| Secret | `POSTMAN_ACCESS_TOKEN` | Session-scoped token extracted from `~/.postman/postmanrc` after `postman login` — required for Bifrost git-sync, governance, and system-env steps |
-| Secret | `GH_FALLBACK_TOKEN` | Fine-grained PAT with Contents/Workflows/Actions/Variables write — required because default `GITHUB_TOKEN` can't write to `.github/workflows/` |
-| Variable | `REQUESTER_EMAIL` | Workspace audit metadata |
-| Variable | `POSTMAN_USER_ID` | Numeric Postman user ID for workspace admin assignment |
 
 ## 5. Universal Pattern vs Per-Service Differences
 
@@ -145,6 +142,9 @@ not to replace integration testing.
    `GITHUB_TOKEN` cannot write to `.github/workflows/` (supply-chain
    protection); the action's `gh-fallback-token` input is the documented
    mechanism for materializing the generated CI test workflow.
+   **Caveat for customer:** fine-grained PATs are name-scoped, not ID-scoped —
+   if onboarded repos get renamed, the PAT's repository access list must be
+   updated or the workflow silently loses authorization. See §11 iteration #5.
 4. **CI/CD runner availability.** GitHub Actions runners for most teams. For
    the GitLab CI team mentioned in the brief, the underlying CLIs
    (`postman-bootstrap-action`, `postman-repo-sync-action`) are installable
@@ -175,20 +175,28 @@ is required.
 
 ## 9. Validation Evidence
 
-<!-- TODO: after a clean run, replace this block with: -->
+**Workspace:** [PMT] payment-refund-service
+([open in Postman](https://go.postman.co/workspace/1acfc458-0f68-456c-9eed-a1b74292c092))
 
-<!--
-- **Latest green workflow run:** https://github.com/<OWNER>/jr-cse-payments-postman-onboarding/actions/runs/<RUN_ID>
-- **Committed collections:** see [`postman/collections/`](postman/collections/)
-- **Generated CI workflow:** see [`.github/workflows/payments-tests.yml`](.github/workflows/payments-tests.yml)
+**First green run after clean rebuild:**
+https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/runs/26606913232
+— 38 seconds, single attempt, all six job steps passed.
 
-Screenshots from the validated workspace:
+**Committed artifacts** (committed back by the action's repo-sync phase):
+- [`postman/collections/`](postman/collections/) — three JSON exports (Baseline, Contract, Smoke)
+- [`.github/workflows/payments-tests.yml`](.github/workflows/payments-tests.yml) — generated CI workflow
+
+<!-- TODO: take screenshots after validating UI per SETUP.md Step 7, then uncomment:
 
 ![Workspace home](docs/screenshots/workspace-home.png)
+*Workspace home showing three collections, four environments, mock server, monitor*
+
 ![Spec Hub](docs/screenshots/spec-hub.png)
+*Payment Refund API spec v2.1.0 rendered in Spec Hub*
+
 ![Baseline collection](docs/screenshots/baseline-collection.png)
-![Environments](docs/screenshots/environments.png)
-![Monitor](docs/screenshots/monitor.png)
+*Baseline collection expanded showing refunds/ and health/ request groups*
+
 -->
 
 ## 10. Rerun / Idempotency Behavior
@@ -197,55 +205,118 @@ The action persists workspace, spec, and collection IDs as GitHub repo
 variables on its first successful run, then reads those variables on
 subsequent runs to reuse the existing assets rather than creating duplicates.
 
-<!-- TODO: after running the workflow at least twice, replace with observed behavior:
+```bash
+# Confirm the persisted variables:
+gh variable list --repo <OWNER>/jr-cse-payments-postman-onboarding
+# Expected: ~5 Postman-prefixed variables after a clean run
+```
 
-Observed in this repo:
+**Edge case observed during initial discovery** (before the verified workflow
+was committed): when the workflow fails *before* the persist step, each
+failed run can create a fresh set of artifacts in Postman. After the first
+green run, idempotency kicks in. If you see duplicate collections in a
+workspace, clean them up in the Postman UI; subsequent runs won't duplicate.
+
+<!-- TODO: after running the workflow at least twice on the clean rebuild, replace with observed behavior:
+
+Confirmed on this repo:
 - Re-running the workflow with no changes — same workspace, same collection IDs,
   same monitor; no duplication. The action updated metadata in place.
 - Editing the spec (e.g., bumping `info.version`) and re-running — same
   workspace, same collection IDs, collections regenerated from the updated
   spec, monitor unchanged.
 
-⚠️ **Edge case observed during initial build:** When the workflow fails before
-the persist step (e.g., the four iterations required to get the first green
-run — see `issues-log.md`), each failed run can create a fresh set of artifacts.
-After the first green run, idempotency kicks in. If you see duplicate
-collections in the workspace, clean them up in the Postman UI; subsequent
-runs won't duplicate.
 -->
 
 ## 11. Known Issues and Resolutions
 
-Four iterations were needed to get the first green run on this scaffold. Each
-exposed a real discrepancy between the action's declared contract and its
-runtime behavior — documented honestly in `issues-log.md`:
+### 11.A — Build iterations (issues that required code/config changes)
+
+Five iterations were needed during initial discovery to land the verified
+working workflow. Each exposed a real discrepancy between the action's
+declared contract and its runtime behavior — documented in `issues-log.md`.
 
 1. **`variables: write` is not a valid GitHub Actions permission key.**
    The job-level `permissions:` block has a fixed allow-list; `variables`
    isn't in it. Repo variables are written via the GitHub API using
-   `GITHUB_TOKEN`'s standard scopes, not a job permission. Fix: remove the
-   line.
+   `GITHUB_TOKEN`'s standard scopes, not a job permission. **Fix:** remove
+   the line.
 
 2. **`spec-url` is required despite `action.yml` declaring it optional.**
    The orchestrator's `action.yml` says "provide either `spec-url` or
    `spec-path`," but the underlying `postman-bootstrap-action@v0` requires
-   `spec-url` at runtime. Fix: provide both inputs.
+   `spec-url` at runtime. **Fix:** provide both inputs.
 
 3. **Default `GITHUB_TOKEN` cannot write to `.github/workflows/`.** This is
    by design (supply-chain protection). The action's `gh-fallback-token`
-   input exists for exactly this case. Fix: create a fine-grained PAT with
-   Workflows write, wire it via `gh-fallback-token`.
+   input exists for exactly this case. **Fix:** create a fine-grained PAT
+   with Workflows write, wire it via `gh-fallback-token`.
 
 4. **PAT must be verified before saving as a secret.** A truncated or
    mistyped PAT fails silently — the workflow run reports a 403 with no
-   clear cause. Fix: always test the PAT against
+   clear cause. **Fix:** always test the PAT against
    `GET https://api.github.com/user` and the target repo's `permissions.push`
    before setting the secret.
 
-**Pattern across all four:** open-alpha tooling has loose `action.yml`
+5. **Fine-grained PATs are name-scoped, not ID-scoped.** Renaming a repo
+   (from `payments-postman-onboarding` to `jr-cse-payments-postman-onboarding`
+   during the rebuild) silently broke the PAT's authorization because the
+   token's repository access list still pointed at the old name. **Fix:**
+   edit the PAT in GitHub settings, add the new repo name to its repository
+   access list. Token value unchanged. **Consulting note:** this is a real
+   customer-side ask for any engagement where onboarded repos might get
+   renamed — surfaced in §7 #3.
+
+**Pattern across all five:** open-alpha tooling has loose `action.yml`
 validation but stricter runtime requirements in the chained downstream
 actions. The reliable verification is running it; the unreliable one is
 trusting the declared contract.
+
+### 11.B — Annotations on green runs (informational, not blocking)
+
+Three categories of warnings appear on every green run. Documenting them so
+an evaluator reading the logs knows I noticed and made deliberate decisions.
+
+**Node.js 20 runtime deprecation (upstream)**
+
+GitHub flags `postman-cs/postman-bootstrap-action@v0` and
+`postman-cs/postman-repo-sync-action@v0` (chained internally by the
+orchestrator) as running on the deprecated Node.js 20 runtime. Forced
+migration to Node 24 is scheduled for June 2026; full removal in September
+2026. **This is upstream tooling, not anything in this repo's workflow.**
+The action is in open-alpha and the maintainers will publish a Node 24
+version before the deadline. I deliberately did not force the opt-in via
+`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` — running an action on a runtime
+its maintainers haven't validated could mask issues they should catch in
+their own release cycle. The right CSE move is to defer to the upstream
+maintainer's timeline.
+
+**OpenAPI spec linting warnings (brief's spec, by design)**
+
+The onboarding action surfaces nine OpenAPI linting warnings on the Payment
+Refund spec — all of the form `A schema property should have a $ref
+property referencing a reusable schema`. These flag inline schemas in
+parameters and response bodies that should be extracted into
+`components.schemas` for reusability. The spec ships from the brief
+unmodified, so I didn't refactor it; in a real engagement these would be
+fed back to the service owner as a spec-quality improvement during the
+discovery phase, and they do not block onboarding.
+
+**Workspace role assignment conflict (benign upstream behavior)**
+
+Every run produces a warning of the form:
+
+```
+Failed to invite requester: PATCH /workspaces/.../roles failed: 400
+Bad Request - Only one role is supported for user 38960911
+```
+
+The action attempts to assign the workspace-admin role to the requester
+(me), but I already hold the workspace-creator role on the new workspace.
+Postman's API rejects the second role assignment. **Functional impact:
+zero** — I have admin access via the creator role. In a real engagement
+where the requester is a different user from the workspace creator (e.g.,
+a CSE provisioning for a service owner), this warning would not appear.
 
 ## 12. Trade-offs
 
@@ -260,8 +331,12 @@ What I'd do differently with more time:
 - **Build the org-mode path.** The workflow has commented `org-mode: true` /
   `workspace-team-id` lines for org-scoped Postman teams. My team isn't
   org-mode, so I haven't exercised that code path.
-- **Add a workspace cleanup workflow.** Today, failed runs can leave duplicate
-  collections that have to be cleaned manually. A cleanup script would help.
+- **Add a workspace cleanup workflow.** During discovery, failed runs left
+  duplicate collections that had to be cleaned manually. A cleanup script
+  would help during pilot iterations across many services.
+- **Surface the PAT-rename issue earlier.** §11.A #5 should be in a
+  pre-flight checklist for any customer engagement where repos are likely to
+  be renamed during pilot.
 
 ## 13. Scaling Considerations
 
@@ -293,30 +368,29 @@ queries and dependency graphs.
 
 ### What I validated manually
 - Read `action.yml` for `postman-api-onboarding-action@v0` directly in the
-  upstream repo at commit time. Verified against the input schema.
+  upstream repo. Verified inputs against the live schema.
 - Ran the workflow against a real Postman workspace; confirmed each artifact
   appeared in the UI through the six checks in `SETUP.md` Step 7.
-- Tested re-run behavior to confirm idempotency.
-- Diffed Claude's draft of the loan workflow against this one to confirm only
-  the per-service inputs differed (see `ADAPTATION.md` in the companion repo).
-- Verified the PAT against `https://api.github.com/user` and the specific repo's
-  `permissions.push` field before saving it as a secret — this caught one
-  silently-truncated paste.
+- Tested the PAT against `https://api.github.com/user` and the specific
+  repo's `permissions.push` field before saving it as a secret — this caught
+  one silently-truncated paste during initial setup.
+- Tracked the source of every warning annotation in green runs (§11.B) to
+  distinguish upstream behavior from issues I introduced.
 
 ### What AI got wrong (and I corrected)
 - **AI added `variables: write` to the job permissions block.** GitHub Actions
   has a fixed allow-list of permission keys; `variables` isn't one. Caught on
   the first `gh workflow run` with HTTP 422 "Unexpected value 'variables'."
-  Fix: removed the line. Logged in `issues-log.md` 2026-05-28 entry #1.
+  **Fix:** removed the line. Logged in `issues-log.md` 2026-05-28 entry #1.
 - **AI used `spec-path` alone and dropped `spec-url`.** Despite the
   orchestrator's `action.yml` declaring both as optional, the downstream
   `postman-bootstrap-action@v0` requires `spec-url` at runtime. Caught on the
-  second run with "Input required and not supplied: spec-url." Fix: added
+  second run with "Input required and not supplied: spec-url." **Fix:** added
   `spec-url` while keeping `spec-path`. Logged in entry #2.
 - **AI omitted `gh-fallback-token` entirely.** The action's documented escape
   hatch for `.github/workflows/` writes was missing from the initial draft.
   Caught on the third run with a 422 "without `workflows` permission" error
-  during the commit-back step. Fix: created a fine-grained PAT with
+  during the commit-back step. **Fix:** created a fine-grained PAT with
   Contents/Workflows/Actions/Variables write, wired it via
   `gh-fallback-token`. Logged in entry #3.
 - **AI claimed `ci-workflow-path` default was `onboard.yml`** (collision risk).
@@ -325,13 +399,19 @@ queries and dependency graphs.
 - **AI claimed `v0.x.y` immutable tags exist** for pinning. Real state: only
   `@v0` rolling exists; no immutable tags are published yet. Documented in
   `VERIFIED-NOTES.md`. Used `@v0`.
+- **AI did not anticipate that renaming the repo would break PAT scoping.**
+  Fine-grained PATs are name-scoped at the GitHub API level — renaming the
+  repo silently invalidated the PAT's repository access list. Discovered on
+  the first run after the rebuild's rename from `payments-postman-onboarding`
+  to `jr-cse-payments-postman-onboarding`. **Fix:** added new repo name to
+  the PAT's access list (no token regeneration needed). Logged as iteration #5.
 
 ### Why this matters
 AI accelerated drafting by maybe 5x and was useful for the prose and the
 non-load-bearing scaffolding. On the load-bearing pieces — the workflow file
 itself, the action contract — it confidently invented inputs that don't exist
 and dropped inputs that do. Every load-bearing claim was verified against the
-upstream `action.yml` or against a real run. The pattern: **AI does first
+upstream `action.yml` or against a real run. **The pattern: AI does first
 drafts; humans verify against authoritative sources; both contributions are
 documented honestly.** Open-alpha tooling makes this verification especially
 important because the declared contract (`action.yml` README) lags behind
