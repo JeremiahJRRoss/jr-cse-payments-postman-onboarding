@@ -1,0 +1,84 @@
+name: Onboard Payments Service to Postman
+
+# Onboards the Payment Refund API into Postman via the open-alpha orchestrator.
+# This file is the verified working version — every input was validated against
+# the live postman-cs/postman-api-onboarding-action@v0 contract through four
+# debugging iterations. See issues-log.md and README §11 for the corrections.
+#
+# BEFORE FIRST RUN — see SETUP.md. Required configuration:
+#   Secrets:   POSTMAN_API_KEY, POSTMAN_ACCESS_TOKEN, GH_FALLBACK_TOKEN
+#   Variables: REQUESTER_EMAIL, POSTMAN_USER_ID
+#               (POSTMAN_TEAM_ID only if your Postman team is org-scoped)
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - 'specs/payment-refund-api-openapi.yaml'
+      - '.github/workflows/onboard.yml'
+
+jobs:
+  onboard:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write      # action triggers the generated CI workflow
+      contents: write     # action commits generated collections back
+      # NOTE: 'variables: write' is NOT a valid permission key in GitHub Actions.
+      # Repo variables are written via GITHUB_TOKEN's standard scopes, not job perms.
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Onboard Payments service into Postman
+        id: onboard
+        uses: postman-cs/postman-api-onboarding-action@v0
+        with:
+          project-name: payment-refund-service
+          domain: payments
+          domain-code: PMT
+          requester-email: ${{ vars.REQUESTER_EMAIL }}
+          workspace-admin-user-ids: ${{ vars.POSTMAN_USER_ID }}
+
+          # BOTH spec-url AND spec-path are required. The action.yml declares both
+          # as optional ("provide either"), but the underlying bootstrap action
+          # requires spec-url at runtime. spec-path is used for repo-side metadata.
+          spec-url: https://raw.githubusercontent.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/main/specs/payment-refund-api-openapi.yaml
+          spec-path: specs/payment-refund-api-openapi.yaml
+
+          # 4 environments from the spec's servers block
+          environments-json: '["prod","uat","qa","dev"]'
+          env-runtime-urls-json: '{"prod":"https://api.payments.example.com/v2","uat":"https://api-uat.payments.example.com/v2","qa":"https://api-qa.payments.example.com/v2","dev":"https://api-dev.payments.example.com/v2"}'
+
+          # Generated CI test workflow — runs the collections on a schedule.
+          # Explicit path avoids any future default change (current default: ci.yml).
+          generate-ci-workflow: true
+          ci-workflow-path: .github/workflows/payments-tests.yml
+
+          # --- ORG-MODE TEAMS ONLY ---
+          # Uncomment if your first run errors on team/org. Sets POSTMAN_TEAM_ID
+          # as a repo variable, then uncomment these two lines:
+          # org-mode: true
+          # workspace-team-id: ${{ vars.POSTMAN_TEAM_ID }}
+
+          postman-api-key: ${{ secrets.POSTMAN_API_KEY }}
+          postman-access-token: ${{ secrets.POSTMAN_ACCESS_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # REQUIRED: gh-fallback-token is a fine-grained PAT with Contents +
+          # Workflows + Actions + Variables write scopes. The default GITHUB_TOKEN
+          # cannot write to .github/workflows/ by design (supply-chain protection);
+          # this PAT lets the action materialize the generated CI test workflow.
+          # See SETUP.md Step 2 for PAT creation instructions.
+          gh-fallback-token: ${{ secrets.GH_FALLBACK_TOKEN }}
+
+      - name: Print onboarding outputs
+        if: always()
+        run: |
+          echo "workspace-url:  ${{ steps.onboard.outputs.workspace-url }}"
+          echo "workspace-id:   ${{ steps.onboard.outputs.workspace-id }}"
+          echo "spec-id:        ${{ steps.onboard.outputs.spec-id }}"
+          echo "mock-url:       ${{ steps.onboard.outputs.mock-url }}"
+          echo "monitor-id:     ${{ steps.onboard.outputs.monitor-id }}"
+          echo "collections:    ${{ steps.onboard.outputs.collections-json }}"
+          echo "bootstrap:      ${{ steps.onboard.outputs.bootstrap-outcome }}"
+          echo "repo-sync:      ${{ steps.onboard.outputs.repo-sync-outcome }}"

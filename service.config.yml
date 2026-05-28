@@ -1,0 +1,38 @@
+# service.config.yml — per-service onboarding inputs (no secrets)
+#
+# Documents inputs passed to postman-api-onboarding-action in onboard.yml.
+# Secrets (POSTMAN_API_KEY, POSTMAN_ACCESS_TOKEN) live in GitHub repo secrets.
+# Identity vars (REQUESTER_EMAIL, POSTMAN_USER_ID) live in GitHub repo variables.
+
+service:
+  name: payment-refund-service
+  domain: payments
+  domain_code: PMT
+
+spec:
+  path: specs/payment-refund-api-openapi.yaml
+  title: "Payment Processing API - Refund Service"
+  version: "2.1.0"
+  auth_declared: "OAuth 2.0 (external) + JWT (internal)"
+  compute: "Lambda + API Gateway"
+
+environments:
+  - prod
+  - uat
+  - qa
+  - dev
+
+environment_urls:
+  prod: https://api.payments.example.com/v2
+  uat:  https://api-uat.payments.example.com/v2
+  qa:   https://api-qa.payments.example.com/v2
+  dev:  https://api-dev.payments.example.com/v2
+
+ci_workflow:
+  generate: true
+  path: .github/workflows/payments-tests.yml
+
+notes:
+  - All environment URLs are example.com (from the provided spec); not real endpoints.
+  - In a real engagement these come from the platform team and are likely behind
+    customer auth + network controls.
