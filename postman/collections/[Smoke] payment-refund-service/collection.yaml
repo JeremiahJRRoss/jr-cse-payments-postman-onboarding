@@ -18,7 +18,7 @@ description: |-
   Contact Support:
    Name: Payment Platform Team
    Email: payment-platform@example.com
-id: dfa1f33c-ac2d-464f-be6d-6512f666e56e
+id: 7b21d464-8662-4ed1-97ef-1c025dcf0b59
 auth:
   type: oauth2
   credentials:
