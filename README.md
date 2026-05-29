@@ -173,6 +173,23 @@ workflow is necessary but not sufficient — the `POSTMAN_ACCESS_TOKEN` can
 silently expire and leave the workspace half-built, so visual verification
 is required.
 
+**Note on the generated CI workflow (`payments-tests.yml`).** This is the
+*test* pipeline emitted by repo-sync, distinct from the *onboarding* workflow
+(`onboard.yml`) run above. As of PR R1 it parses and is wired correctly
+(valid `on` + `jobs.test`), so it registers on GitHub instead of being
+rejected as "Invalid workflow file." It will **not pass yet**, by design, for
+two reasons: (1) its "Resolve Postman Resource IDs" step reads
+`.postman/resources.yaml`, which is `.gitignore`d and therefore absent on a
+clean CI checkout, so the step `abort`s with "Missing Postman resource IDs";
+and (2) the collections target `example.com`, the same placeholder that makes
+the monitor red by design. This is the consistent, honest position for the
+take-home: CI can't pass against placeholder hosts. The one-line customer fix
+is to un-ignore `.postman/` (remove it from `.gitignore` and commit
+`.postman/resources.yaml`) and supply real environment URLs + a
+`POSTMAN_API_KEY` secret. See §11.A #6 (the workflow decode) and
+`issues-log.md` for the full decision record. Refs: submission review item 1,
+layer 2.
+
 ## 9. Validation Evidence
 
 **Workspace:** [PMT] payment-refund-service
