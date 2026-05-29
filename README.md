@@ -373,24 +373,56 @@ What I'd do differently with more time:
 - **Build the org-mode path.** The workflow has commented `org-mode: true` /
   `workspace-team-id` lines for org-scoped Postman teams. My team isn't
   org-mode, so I haven't exercised that code path.
-- **Add a pre-run reuse-or-clean guard.** Re-running accumulates duplicates
-  because the workspace is reused but its contents are re-created every run
-  (§10) — not only when a run fails. A guard keyed on the workspace git-sync
-  link would, before provisioning, either detect the existing canonical objects
-  and refresh them in place or clear the prior set, returning the workspace to
-  exactly three collections and one monitor. That closes the workspace-sprawl
-  gap for cohort rollout across many services.
 - **Surface the PAT-rename issue earlier.** §11.A #5 should be in a
   pre-flight checklist for any customer engagement where repos are likely to
   be renamed during pilot.
-- **Self-heal the escaped-workflow defect (§11.A #6).** Re-escaping is now
-  confirmed on every re-run (see §10), so today the decode is a manual step
-  after each onboarding run. The durable fix is a post-generation decode step
-  in `onboard.yml` so re-runs repair the escaped `payments-tests.yml`
-  automatically, plus reporting the escaping to the upstream repo-sync
-  maintainers. Deliberately left as documentation here, not code — out of scope
-  for the take-home, but the right productionizing move so the manual decode
-  isn't needed on every sync.
+
+### Recommended future changes (productionizing)
+
+The engineering changes I'd make in a real engagement to harden this from a
+working take-home into a fleet-ready onboarding pipeline. Each is scoped and
+tied to something observed in this repo; **none are implemented here** —
+deliberately, the take-home's job is to name and scope them, not build them.
+Effort figures are rough estimates, not measured.
+
+1. **Idempotent re-runs — a reuse-or-clean guard.** *(headline)* The action
+   reuses the workspace (git-sync `linked_match`) but re-creates the spec, all
+   three collections, the mock, and the monitor with new IDs on every run,
+   writing no repo variables — so repeated runs accumulate duplicates in one
+   workspace (measured: 5 runs → 15 collections; see §10). At 50→300 services
+   this scales with re-run *frequency*, not service count, which is why it's the
+   headline fix. Wrap the action with a pre-run guard keyed on the same
+   workspace git-sync link it already uses: query the workspace and either reuse
+   existing child objects by name or delete the prior set before re-creating.
+   Alternatives — a post-run dedup step (keep newest, remove prior), or an
+   upstream change so the action reuses children the way it already reuses the
+   workspace. **Effort:** ~half a day — a guard step in `onboard.yml` wrapping
+   the action, or an upstream PR to `postman-api-onboarding-action`. **Interim
+   posture:** create-once per service; on re-onboard, clear the workspace first.
+2. **Self-healing CI-workflow generation.** Repo-sync emits the generated CI
+   workflow as a JSON-escaped single line (literal `\n`), which GitHub rejects
+   as an invalid workflow file, and it re-emits the broken file on every re-run
+   (§11.A #6). Add a post-generation normalization step in `onboard.yml` that
+   decodes `\n`→newlines on the generated workflow after repo-sync commits, so
+   re-runs repair it automatically instead of re-emitting the broken file;
+   report the escaping upstream. **Effort:** ~1 hour — a post-step in
+   `onboard.yml`, plus an upstream issue.
+3. **Make the generated CI workflow resolvable on a clean checkout.** The
+   generated CI workflow reads `.postman/resources.yaml`, but `.postman/` is
+   gitignored, so the resolve step aborts on a fresh CI checkout (§11.A #6
+   layer 2; §8). Commit the resolver metadata (after verifying it holds IDs, not
+   secrets), or have the workflow derive resource UIDs from the committed
+   collection files; the customer's one-line equivalent is to un-ignore
+   `.postman/`. **Effort:** small — a `.gitignore` change plus a committed
+   metadata file, or upstream.
+4. **Drop the public-raw-URL spec dependency.** `onboard.yml` passes a public
+   `raw.githubusercontent.com` URL as `spec-url`, so the spec must be pushed to
+   a public `main` before a run — even though `action.yml` says `spec-path`
+   alone is sufficient (§11.A #2; VERIFIED-NOTES). Once the alpha runtime quirk
+   that forced `spec-url` is confirmed resolved, rely on `spec-path` (the
+   checked-out file) and remove `spec-url`, eliminating the public-URL and
+   push-timing dependency. Re-validate end-to-end before removing. **Effort:**
+   trivial once verified — an `onboard.yml` input change.
 
 ## 13. Scaling Considerations
 
@@ -405,7 +437,10 @@ because:
   the spec, collections, mock, and monitor (it is **not** idempotent inside the
   workspace; see §10). Cohort rollout should onboard each repo once and avoid
   unnecessary re-runs; cohorting still holds because per-service config is the
-  only delta
+  only delta. Re-run safety is a precondition for the cohort math, not a detail:
+  making re-runs idempotent (Recommended future changes #1, §12) is what would
+  let the platform team re-run during rollout instead of onboarding once and
+  freezing
 - Customer-side requirements (§7) are knowable upfront, so cohort planning
   reduces to bucketing services by spec freshness + auth pattern + CI platform
 
