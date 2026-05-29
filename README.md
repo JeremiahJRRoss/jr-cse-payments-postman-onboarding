@@ -203,16 +203,10 @@ https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/run
 - [`postman/collections/`](postman/collections/) — three JSON exports (Baseline, Contract, Smoke)
 - [`.github/workflows/payments-tests.yml`](.github/workflows/payments-tests.yml) — generated CI workflow
 
-
-**Workspace:** [PMT] payment-refund-service ([open in Postman](https://go.postman.co/workspace/<YOUR_WORKSPACE_ID>))
-
-**Latest green run:** https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/runs/<RUN_ID>
-
-**Committed artifacts:**
-- [`postman/collections/`](postman/collections/) — three JSON exports
-- [`.github/workflows/payments-tests.yml`](.github/workflows/payments-tests.yml) — generated CI workflow
-
 **Walkthrough with all five screenshots:** [`docs/VALIDATION-EVIDENCE.md`](docs/VALIDATION-EVIDENCE.md)
+
+<!-- item 6: §9 says "JSON exports" but the committed collections are YAML directory trees
+     (collection.yaml + *.request.yaml). Reconcile JSON-vs-YAML wording separately. -->
 
 ## 10. Rerun / Idempotency Behavior
 
@@ -232,16 +226,15 @@ failed run can create a fresh set of artifacts in Postman. After the first
 green run, idempotency kicks in. If you see duplicate collections in a
 workspace, clean them up in the Postman UI; subsequent runs won't duplicate.
 
-<!-- TODO: after running the workflow at least twice on the clean rebuild, replace with observed behavior:
-
-Confirmed on this repo:
-- Re-running the workflow with no changes — same workspace, same collection IDs,
-  same monitor; no duplication. The action updated metadata in place.
-- Editing the spec (e.g., bumping `info.version`) and re-running — same
-  workspace, same collection IDs, collections regenerated from the updated
-  spec, monitor unchanged.
-
--->
+**Outstanding validation — confirming no-change re-run.** The persistence
+mechanism is verifiable now: `gh variable list` shows the Postman-prefixed IDs
+the first green run wrote. What has **not** yet been observed on this clean
+rebuild is a second, no-change run confirming the action reuses those IDs
+without duplicating the collections or the monitor. That single re-run is the
+one outstanding validation for this section. Until it is run and recorded here,
+the no-duplication behavior stands as the action's documented design — not a
+result I claim to have re-confirmed on this repo. (Once run, replace this note
+with the observed outcome.)
 
 ## 11. Known Issues and Resolutions
 
