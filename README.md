@@ -203,45 +203,49 @@ https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/run
 - [`postman/collections/`](postman/collections/) — three JSON exports (Baseline, Contract, Smoke)
 - [`.github/workflows/payments-tests.yml`](.github/workflows/payments-tests.yml) — generated CI workflow
 
-
-**Workspace:** [PMT] payment-refund-service ([open in Postman](https://go.postman.co/workspace/<YOUR_WORKSPACE_ID>))
-
-**Latest green run:** https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/runs/<RUN_ID>
-
-**Committed artifacts:**
-- [`postman/collections/`](postman/collections/) — three JSON exports
-- [`.github/workflows/payments-tests.yml`](.github/workflows/payments-tests.yml) — generated CI workflow
-
 **Walkthrough with all five screenshots:** [`docs/VALIDATION-EVIDENCE.md`](docs/VALIDATION-EVIDENCE.md)
+
+<!-- item 6: §9 says "JSON exports" but the committed collections are YAML directory trees
+     (collection.yaml + *.request.yaml). Reconcile JSON-vs-YAML wording separately. -->
 
 ## 10. Rerun / Idempotency Behavior
 
-The action persists workspace, spec, and collection IDs as GitHub repo
-variables on its first successful run, then reads those variables on
-subsequent runs to reuse the existing assets rather than creating duplicates.
+**Observed: re-running is _not_ idempotent in this setup — it duplicates.**
+A second run of `onboard.yml` on `main` with no source changes
+([run 26652077213](https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/runs/26652077213),
+green in 53s) provisioned a **fresh set of collections with new IDs** rather
+than reusing the existing ones. The action's commit-back
+([`6fa0606`](https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/commit/6fa0606))
+rewrote the `id` of all three `collection.yaml` files (e.g. the Smoke
+collection went `7d304463-…` → `88c5f9ff-…`), and the Postman workspace ended
+up with duplicate collections — the earlier set alongside the new one.
 
-```bash
-# Confirm the persisted variables:
-gh variable list --repo <OWNER>/jr-cse-payments-postman-onboarding
-# Expected: ~5 Postman-prefixed variables after a clean run
+**Why (observed, not assumed):** the action does not persist resource IDs as
+repo variables. `gh variable list` returns only the two *input* variables set
+at setup, never updated by a run:
+
+```text
+NAME             VALUE         UPDATED
+POSTMAN_USER_ID  38960911      about 18 hours ago
+REQUESTER_EMAIL  jr@ross.moda  about 18 hours ago
 ```
 
-**Edge case observed during initial discovery** (before the verified workflow
-was committed): when the workflow fails *before* the persist step, each
-failed run can create a fresh set of artifacts in Postman. After the first
-green run, idempotency kicks in. If you see duplicate collections in a
-workspace, clean them up in the Postman UI; subsequent runs won't duplicate.
+No `POSTMAN_*` workspace/spec/collection-ID variables are written back, and the
+run log shows **no variable-write attempt and no permission error** for them —
+so a subsequent run has nothing to read and creates a new set each time.
+(Whether the open-alpha action intends to persist these and silently no-ops, or
+never attempts it, can't be determined from outside — but the observed behavior
+is duplication either way.)
 
-<!-- TODO: after running the workflow at least twice on the clean rebuild, replace with observed behavior:
+**Mitigation:** treat re-runs as additive. After a re-run, keep the most recent
+set (the IDs written by the latest run, visible on `main` after the sync commit)
+and delete the older duplicate collections in the Postman UI (right-click →
+Delete) to return to exactly three collections and one monitor.
 
-Confirmed on this repo:
-- Re-running the workflow with no changes — same workspace, same collection IDs,
-  same monitor; no duplication. The action updated metadata in place.
-- Editing the spec (e.g., bumping `info.version`) and re-running — same
-  workspace, same collection IDs, collections regenerated from the updated
-  spec, monitor unchanged.
-
--->
+**A durable fix** would mean capturing the action's step outputs (`workspace-id`,
+`spec-id`, `collections-json`) and re-supplying them on the next run, or an
+upstream change so the action persists and reuses them — out of scope for this
+exercise, and worth raising with the action's maintainers.
 
 ## 11. Known Issues and Resolutions
 
@@ -382,7 +386,10 @@ because:
 - The workflow file is structurally identical across services (~6-8 input
   lines change between services with very different compute and auth — see
   `ADAPTATION.md` in the companion repo)
-- The action persists state in repo variables, so re-runs are idempotent
+- Onboarding is create-once per service: the open-alpha action is **not**
+  idempotent on re-run (it re-provisions and duplicates rather than reusing —
+  see §10), so cohort rollout should onboard each repo once and avoid
+  unnecessary re-runs until the action persists/reuses resource IDs upstream
 - Customer-side requirements (§7) are knowable upfront, so cohort planning
   reduces to bucketing services by spec freshness + auth pattern + CI platform
 

@@ -25,6 +25,12 @@ wins and this file is wrong — fix it.
   by the action via the GitHub API using `github-token` / `gh-fallback-token` —
   action.yml: "GitHub token used for repo variables and generated commits." See
   onboard.yml's inline note and README §11.A #1.
+- **Observed caveat (resource-ID persistence):** the action.yml wording above is
+  the *declared* contract. In practice the action wrote **no** `POSTMAN_*`
+  workspace/spec/collection-ID variables on this repo (`gh variable list` shows
+  only the two input variables), and the run log logs no variable-write attempt —
+  so re-runs re-provision and duplicate rather than reuse. Idempotency is **not**
+  observed here; see README §10.
 
 ## ci-workflow-path
 - Default is `.github/workflows/ci.yml` (NOT `onboard.yml`). The earlier
