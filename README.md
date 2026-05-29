@@ -186,18 +186,16 @@ https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/run
 - [`postman/collections/`](postman/collections/) — three JSON exports (Baseline, Contract, Smoke)
 - [`.github/workflows/payments-tests.yml`](.github/workflows/payments-tests.yml) — generated CI workflow
 
-<!-- TODO: take screenshots after validating UI per SETUP.md Step 7, then uncomment:
 
-![Workspace home](docs/screenshots/workspace-home.png)
-*Workspace home showing three collections, four environments, mock server, monitor*
+**Workspace:** [PMT] payment-refund-service ([open in Postman](https://go.postman.co/workspace/<YOUR_WORKSPACE_ID>))
 
-![Spec Hub](docs/screenshots/spec-hub.png)
-*Payment Refund API spec v2.1.0 rendered in Spec Hub*
+**Latest green run:** https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/runs/<RUN_ID>
 
-![Baseline collection](docs/screenshots/baseline-collection.png)
-*Baseline collection expanded showing refunds/ and health/ request groups*
+**Committed artifacts:**
+- [`postman/collections/`](postman/collections/) — three JSON exports
+- [`.github/workflows/payments-tests.yml`](.github/workflows/payments-tests.yml) — generated CI workflow
 
--->
+**Walkthrough with all five screenshots:** [`docs/VALIDATION-EVIDENCE.md`](docs/VALIDATION-EVIDENCE.md)
 
 ## 10. Rerun / Idempotency Behavior
 
