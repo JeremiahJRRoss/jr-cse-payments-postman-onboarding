@@ -276,6 +276,9 @@ The visual diff between the two workspaces is `ADAPTATION.md` rendered.
 > **Unguarded re-runs accumulate — 5 runs → 15 collections in one workspace.
 > R5/R7 made visible; mitigation in README §10/§12.**
 
+<!-- TODO(human): screenshots/rerun-accumulation-15-collections.png is referenced
+     but not yet committed to docs/screenshots/. Capture/commit the 15-collections
+     workspace shot, or remove this image line if the shot can't be reproduced. -->
 ![[PMT] payment-refund-service workspace after five no-change onboarding runs — 15 collections (5x Baseline, 5x Contract, 5x Smoke) plus multiple duplicate payment-refund-service - dev environments](screenshots/rerun-accumulation-15-collections.png)
 
 Unlike the five shots above — captured from a single clean run — this one is

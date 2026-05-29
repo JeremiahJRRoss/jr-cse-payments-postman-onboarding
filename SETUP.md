@@ -240,7 +240,11 @@ ls .github/workflows/
 Expected:
 - `git log` shows a commit by `Postman CSE <help@postman.com>` titled "chore: sync Postman artifacts and metadata"
 - `postman/collections/` contains 3 git-sync YAML collection directories (Baseline, Contract, Smoke), each holding `collection.yaml` + `*.request.yaml`
-- `.github/workflows/` contains both `onboard.yml` AND `payments-tests.yml`
+- `.github/workflows/` contains `onboard.yml`, and the run will also have written
+  `payments-tests.yml` there. Note: repo-sync emits that generated file as invalid
+  YAML, so the committed copy is quarantined to
+  `evidence/generated-artifacts/payments-tests.yml.txt` — re-quarantine (or decode)
+  the regenerated file after a run. See README §8 / §11.A #6.
 
 > Note: `postman/collections/` is the action's canonical git-sync YAML. The same
 > three collections are also committed as single-file v2.1 JSON under
@@ -269,7 +273,7 @@ Confirm **all six** items:
 | # | Check | What you should see |
 |---|---|---|
 | 1 | Workspace exists | Sidebar entry, name starts with `[PMT]` |
-| 2 | Spec in Spec Hub | APIs section → "Payment Processing API - Refund Service" v2.1.0 renders |
+| 2 | Spec in Spec Hub | APIs section → "Payment Processing API - Refund Service" v2.1.1 renders |
 | 3 | Three collections | `[Baseline]`, `[Contract]`, `[Smoke]` payment-refund-service — each opens to show `refunds` and `health` folders with populated requests |
 | 4 | Four environments | Environments section: `prod`, `uat`, `qa`, `dev` |
 | 5 | Mock server | Mock Servers section shows one mock |

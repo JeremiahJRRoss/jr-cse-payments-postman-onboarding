@@ -12,7 +12,8 @@ service:
 spec:
   path: specs/payment-refund-api-openapi.yaml
   title: "Payment Processing API - Refund Service"
-  version: "2.1.0"
+  version: "2.1.1"   # tracks the committed spec header (the contract); 2.1.0 -> 2.1.1
+                     # was a deliberate spec-change / re-onboard test (see README §10)
   auth_declared: "OAuth 2.0 (external) + JWT (internal)"
   compute: "Lambda + API Gateway"
 
