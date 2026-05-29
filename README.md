@@ -298,8 +298,13 @@ behavior — documented in `issues-log.md`.
    committed original (re-encode == prior commit; 4370→4280 bytes) and that
    it parses with valid `on` + `jobs.test`. Because this is an
    action-generated artifact, the correction is logged here and in
-   `issues-log.md` rather than applied silently. Refs: submission review
-   item 1, layer 1.
+   `issues-log.md` rather than applied silently. **Confirmed recurring:**
+   re-running `onboard.yml` regenerates the file escaped again every time
+   (observed during the rerun-behavior runs — see §10 and `issues-log.md`),
+   so the decode has to be re-applied after any onboarding run. By choice this
+   is handled as a documented manual step rather than by modifying the
+   generated artifact's producer; the code-level self-heal is the out-of-scope
+   productionizing move noted in §12. Refs: submission review item 1, layer 1.
 
 **Pattern across all six:** open-alpha tooling has loose `action.yml`
 validation but stricter runtime requirements in the chained downstream
@@ -372,11 +377,14 @@ What I'd do differently with more time:
 - **Surface the PAT-rename issue earlier.** §11.A #5 should be in a
   pre-flight checklist for any customer engagement where repos are likely to
   be renamed during pilot.
-- **Self-heal the escaped-workflow defect (§11.A #6).** The durable fix is a
-  post-generation decode step in `onboard.yml` so re-runs repair the escaped
-  `payments-tests.yml` automatically, plus reporting the escaping to the
-  upstream repo-sync maintainers. Out of scope for the take-home, but the
-  right productionizing move so the manual decode isn't needed on every sync.
+- **Self-heal the escaped-workflow defect (§11.A #6).** Re-escaping is now
+  confirmed on every re-run (see §10), so today the decode is a manual step
+  after each onboarding run. The durable fix is a post-generation decode step
+  in `onboard.yml` so re-runs repair the escaped `payments-tests.yml`
+  automatically, plus reporting the escaping to the upstream repo-sync
+  maintainers. Deliberately left as documentation here, not code — out of scope
+  for the take-home, but the right productionizing move so the manual decode
+  isn't needed on every sync.
 
 ## 13. Scaling Considerations
 
