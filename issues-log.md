@@ -85,3 +85,16 @@ clean CI checkout; collections also target example.com (placeholder hosts).
 ```
 **Changed:** No code change. Chose Option C (blueprint §3): document the limitation rather than commit `.postman/` metadata. Recorded in README §8 with the one-line customer fix (un-ignore `.postman/` + supply real URLs/`POSTMAN_API_KEY`).
 **Source of fix:** decision. Consistent with the monitor's by-design red status on example.com; A/B (commit `.postman/resources.yaml`) is the change a real customer makes for a green badge. Refs: submission review item 1, layer 2.
+
+### 2026-05-29 — onboarding re-run is NOT idempotent: new collection IDs + workspace duplicates
+**Tried:** Validating README §10's idempotency claim by observation (not assumption) — a second no-change `workflow_dispatch` run of `onboard.yml` on `main` (run 26652077213, green in 53s).
+**Error:**
+```
+Re-run minted new collection IDs instead of reusing them: sync commit 6fa0606
+rewrote all three collection.yaml `id`s (Smoke 7d304463-… → 88c5f9ff-…), and the
+Postman workspace gained duplicate collections. `gh variable list` shows only the
+two input vars (POSTMAN_USER_ID, REQUESTER_EMAIL); no POSTMAN_* resource-ID
+variables are persisted. Run log shows no variable-write attempt and no 403.
+```
+**Changed:** No code change. The candidate fix (github-token → GH_FALLBACK_TOKEN) was investigated and ruled out — the action logs no variable-write attempt, so this isn't a token-permission failure. Instead documented the observed non-idempotent behavior across every surface that carried the old claim: README §10 + §13, SETUP.md (Step 7 tip, Step 9, troubleshooting, checklist), and VERIFIED-NOTES.md.
+**Source of fix:** experiment (observed re-run) + inspection (commit diff, `gh variable list`, run-log grep). Honest disclosure: re-runs duplicate; a durable fix is upstream (action must persist/reuse resource IDs) or a custom output-capture layer — out of scope here. Refs: submission review item 4/5 (rerun behavior).

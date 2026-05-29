@@ -269,16 +269,17 @@ Confirm **all six** items:
 | 5 | Mock server | Mock Servers section shows one mock |
 | 6 | Monitor | Monitors section shows one monitor (scheduled or "Ready to run") |
 
-> 💡 **Expecting exactly three collections, not three per run.** The action is
-> idempotent on re-run: it persists workspace/spec/collection IDs as GitHub repo
-> variables and reuses them on subsequent runs. If you ever see 6, 9, or 12
-> collections in the same workspace, the action's idempotency check failed —
-> usually because the run hit an error before the persist step. Clean up
-> duplicates from the UI and verify variables exist:
+> 💡 **One run = three collections; re-runs add more.** Observed: this
+> open-alpha action is **not idempotent** on re-run — it provisions a fresh set
+> with new IDs each time rather than reusing existing assets (see README §10).
+> So 6/9/12 collections means the workflow ran multiple times, not that a check
+> "failed." `gh variable list` holds only the two input variables you set; no
+> `POSTMAN_*` resource-ID variables are written back:
 > ```bash
 > gh variable list --repo $OWNER/jr-cse-payments-postman-onboarding
 > ```
-> You should see ~5 Postman-prefixed variables after a clean run.
+> Prune duplicates from the UI, keeping the most recent set (one Baseline, one
+> Contract, one Smoke).
 
 If any of the six checks fail, the workspace is half-built — see
 `Troubleshooting → Workspace empty or partial`.
@@ -328,10 +329,10 @@ git push
 
 ---
 
-## Step 9 — Test idempotency (optional but recommended)
+## Step 9 — Observe rerun behavior (recommended)
 
-Trigger one more run with no changes. Confirms the action reuses existing
-artifacts instead of duplicating.
+Trigger one more run with no changes and record what actually happens — don't
+assume idempotency.
 
 ```bash
 gh workflow run onboard.yml --repo $OWNER/jr-cse-payments-postman-onboarding
@@ -340,12 +341,14 @@ RUN_ID=$(gh run list --repo $OWNER/jr-cse-payments-postman-onboarding --workflow
 gh run watch "$RUN_ID" --repo $OWNER/jr-cse-payments-postman-onboarding
 ```
 
-After it goes green, refresh the Postman workspace. The collection count
-should still be exactly three. The workspace ID, spec ID, and collection IDs
-in `gh variable list` should be unchanged.
+After it goes green, compare the workspace before/after. **Observed on this
+repo:** the re-run created a *new* set of collections (the committed
+`collection.yaml` IDs changed) and the workspace gained duplicates — the action
+does not persist/reuse resource IDs (`gh variable list` shows only the two input
+variables). See README §10 for the full write-up.
 
 This observation is your answer to Q&A question 5 ("What happens on re-run?
-Do you get duplicate workspaces?"). Document it in README §10.
+Do you get duplicate workspaces?"). Record exactly what you see in README §10.
 
 ---
 
@@ -428,12 +431,15 @@ If the run actually fails because of an org-mode mismatch, see the commented
 
 ### Multiple sets of collections in the workspace
 
-The action created duplicates because earlier runs failed before persisting
-their state. Clean up manually in Postman UI: right-click each duplicate
-collection → Delete. Keep exactly one Baseline, one Contract, one Smoke.
+This open-alpha action is **not idempotent** — each run provisions a fresh set
+of collections with new IDs (it does not persist/reuse resource IDs as repo
+variables; see README §10). Duplicates are therefore expected after any re-run,
+not a sign of a failed step. Clean up manually in the Postman UI: right-click
+each older duplicate → Delete, keeping the most recent Baseline, Contract, and
+Smoke.
 
-Going forward, the action's repo variables now exist (after the first
-successful run), and re-runs will be idempotent.
+Until the action persists IDs upstream, avoid unnecessary re-runs (onboard once
+per service); a re-run will duplicate again.
 
 ### "Bad credentials" when verifying the PAT
 
@@ -448,7 +454,7 @@ triple-click the value field to select all of it before copying.
 - [ ] Six Postman UI checks passed (Step 7)
 - [ ] Five validation screenshots committed to `docs/screenshots/`
 - [ ] Workflow run URL captured for README §9
-- [ ] (Optional) Idempotency test completed — collection count stable across re-runs
+- [ ] (Optional) Rerun behavior observed and recorded in README §10 (note: re-runs duplicate — not idempotent)
 
 Once all boxes are checked, the Payments repo is submission-ready. Move on to
 the loan-origination repo, where you'll apply the same verified pattern
