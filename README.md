@@ -103,7 +103,13 @@ What varies per service:
 | `env-runtime-urls-json` | payments.example.com URLs | lending-api.example.com URLs |
 | `ci-workflow-path` | `payments-tests.yml` | `loan-origination-tests.yml` |
 
-That's roughly 6-8 input lines of difference between the two workflows. See
+Onboarding a new service changes **8 input values** in `onboard.yml`.
+Everything else — the action chain, the job structure, the permissions block,
+the generated baseline/smoke/contract collections, and the environment
+scaffolding — is identical. The 8 are: `project-name`, `domain`, `domain-code`,
+`spec-url`, `spec-path`, `environments-json`, `env-runtime-urls-json`, and
+`ci-workflow-path`. (The table above groups some of these into a single row —
+`domain` / `domain-code` and `spec-path` / `spec-url` each move together.) See
 `ADAPTATION.md` in the loan-origination repo for the actual measured diff.
 
 ## 6. What Generated Checks Validate vs What Still Needs Service-Specific Knowledge
@@ -437,9 +443,9 @@ Effort figures are rough estimates, not measured.
 The pilot scope is 50 services across one platform team. The pattern scales
 because:
 
-- The workflow file is structurally identical across services (~6-8 input
-  lines change between services with very different compute and auth — see
-  `ADAPTATION.md` in the companion repo)
+- The workflow file is structurally identical across services — exactly **8
+  input values** change between services with very different compute and auth
+  (enumerated in §5); see `ADAPTATION.md` in the companion repo
 - Onboarding is create-once per service: on re-run the action reuses the
   workspace via the git-sync link but re-creates — and therefore accumulates —
   the spec, collections, mock, and monitor (it is **not** idempotent inside the
