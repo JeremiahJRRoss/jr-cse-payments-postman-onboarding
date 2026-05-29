@@ -226,7 +226,7 @@ Expected runtime: 40-90 seconds. Final status should be `success`.
 
 ## Step 6 — Sync local working tree
 
-The action commits the generated CI workflow and the collection JSON exports
+The action commits the generated CI workflow and the git-sync YAML collections
 back to `main`. Pull them down:
 
 ```bash
@@ -239,8 +239,14 @@ ls .github/workflows/
 
 Expected:
 - `git log` shows a commit by `Postman CSE <help@postman.com>` titled "chore: sync Postman artifacts and metadata"
-- `postman/collections/` contains 3 JSON files (Baseline, Contract, Smoke)
+- `postman/collections/` contains 3 git-sync YAML collection directories (Baseline, Contract, Smoke), each holding `collection.yaml` + `*.request.yaml`
 - `.github/workflows/` contains both `onboard.yml` AND `payments-tests.yml`
+
+> Note: `postman/collections/` is the action's canonical git-sync YAML. The same
+> three collections are also committed as single-file v2.1 JSON under
+> `postman/exports/` (`baseline.json`, `contract.json`, `smoke.json`) — the
+> JSON the brief asks for, exported from the same run so it corresponds to the
+> YAML. The action does not generate `postman/exports/`.
 
 ---
 

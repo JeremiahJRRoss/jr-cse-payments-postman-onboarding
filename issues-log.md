@@ -128,3 +128,25 @@ item-1 defect, regenerated on re-run, overwriting the committed decode on main.
 ```
 **Changed:** No code change (`onboard.yml` untouched). Documentation correction only: rewrote README §10 to the observed behavior (workspace reused via the git-sync link; spec/collections/mock/monitor re-created and accumulating), corrected §13, fixed §12's cleanup bullet, added the §14 AI-disclosure entry, aligned SETUP §7/§9/troubleshooting and VERIFIED-NOTES, and added the 15-collections accumulation evidence to docs/VALIDATION-EVIDENCE.md.
 **Source of fix:** experiment (multiple re-runs) + inspection (run log "linked_match", `gh variable list`, sync-commit `id` diffs) + UI confirmation (collection count). Honest disclosure: re-runs accumulate; the durable fix is a pre-run reuse-or-clean guard or upstream ID persistence — out of scope here. Refs: submission review item 5 (feeds items 2, 3, plan Q5).
+
+### 2026-05-29 — item 6: brief asks for "JSON exports" but committed collections are git-sync YAML
+**Tried:** Reconciling the submission requirement ("Generated Postman collections (JSON exports)") against what the repo actually commits under `postman/collections/`.
+**Error:**
+```
+README §9 / repo-structure tree and SETUP Step 6 called postman/collections/
+"3 JSON files / JSON exports", but the committed artifacts are git-sync YAML
+directory trees (collection.yaml + *.request.yaml), not .json. Format mismatch
+an evaluator's checklist would catch.
+```
+**Changed:** Option C (BLUEPRINT-json-vs-yaml §2). Kept the YAML canonical; added `postman/exports/{baseline,contract,smoke}.json` — single-file v2.1 exports of the same three collections — and corrected README/SETUP wording so nothing labels the YAML "JSON".
+
+JSON export results (all valid per `jq -e '.info.name'`; v2.1.0 schema):
+
+| File | UID exported | bytes | requests | `_postman_id` == committed YAML `id` |
+|---|---|---|---|---|
+| `baseline.json` | `38960911-8ed6bcc0-3da6-442d-8623-f1e650e22187` | 90,658 | 6 | MATCH |
+| `contract.json` | `38960911-f860f9b5-65db-4b8a-a59e-34f3de0cc1fd` | 116,801 | 7 | MATCH |
+| `smoke.json` | `38960911-cf28226b-bac2-4da3-b062-cf059f669caa` | 100,454 | 7 | MATCH |
+
+**Deviation from blueprint §2 Step 1 (documented):** did NOT delete the workspace + do a fresh `onboard.yml` run. This environment has no `gh` CLI and the GitHub MCP surface exposes no workflow-dispatch, so a clean run was not runnable here. It was also unnecessary: the committed `collection.yaml` files already carry their `id`s, and those exact collections were still live in the workspace (the `2026-05-29T18:25Z` set). Exporting those UIDs gives provable coherence — verified `_postman_id == committed YAML id` for all three — which is the coherence rule's intent. Trade-off: the workspace still holds its ~15 accumulated duplicates (a demo/item-1 concern, not item 6). Acceptance gate (§3) passed: exports valid, no doc calls the YAML "JSON" outside `postman/exports/`, SETUP paths match disk, `postman/collections/` + protected files untouched.
+**Source of fix:** experiment (Postman API `GET /collections/{uid}` per committed `id`; `jq` coherence check) + BLUEPRINT-json-vs-yaml Option C. Refs: submission review item 6.
