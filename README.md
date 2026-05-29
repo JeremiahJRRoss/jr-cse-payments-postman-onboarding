@@ -210,42 +210,44 @@ https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/run
 
 ## 10. Rerun / Idempotency Behavior
 
-**Observed: re-running is _not_ idempotent in this setup — it duplicates.**
-A second run of `onboard.yml` on `main` with no source changes
-([run 26652077213](https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/runs/26652077213),
-green in 53s) provisioned a **fresh set of collections with new IDs** rather
-than reusing the existing ones. The action's commit-back
-([`6fa0606`](https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/commit/6fa0606))
-rewrote the `id` of all three `collection.yaml` files (e.g. the Smoke
-collection went `7d304463-…` → `88c5f9ff-…`), and the Postman workspace ended
-up with duplicate collections — the earlier set alongside the new one.
+Observed across multiple no-change runs of `onboard.yml` on `main`
+(2026-05-29). The action reuses the **workspace** but **re-creates every object
+inside it** on each run:
 
-**Why (observed, not assumed):** the action does not persist resource IDs as
-repo variables. `gh variable list` returns only the two *input* variables set
-at setup, never updated by a run:
+| Object | Reused on re-run? |
+|---|---|
+| Workspace | ✅ same ID — matched via the repo↔workspace git-sync link (run log: `Using canonical workspace (linked_match)`) |
+| Spec / `[Baseline]` / `[Contract]` / `[Smoke]` collections / mock / monitor | ❌ new IDs every run (log: "Created new mock", "Created new monitor"; the sync commit rewrites each `collection.yaml` `id`) |
+
+The action writes **no GitHub repo variables**. `gh variable list` returns only
+the two *input* variables set manually at setup, never updated by a run:
 
 ```text
 NAME             VALUE         UPDATED
-POSTMAN_USER_ID  38960911      about 18 hours ago
-REQUESTER_EMAIL  jr@ross.moda  about 18 hours ago
+POSTMAN_USER_ID  38960911      ...
+REQUESTER_EMAIL  jr@ross.moda  ...
 ```
 
-No `POSTMAN_*` workspace/spec/collection-ID variables are written back, and the
-run log shows **no variable-write attempt and no permission error** for them —
-so a subsequent run has nothing to read and creates a new set each time.
-(Whether the open-alpha action intends to persist these and silently no-ops, or
-never attempts it, can't be determined from outside — but the observed behavior
-is duplication either way.)
+There is no stored-ID persistence — an earlier version of this section claimed
+one (reuse via written-back repo variables); that mechanism does not exist, was
+never verified, and was wrong (see §14). The run log shows no variable-write
+attempt and no permission error, so a subsequent run has nothing to read.
 
-**Mitigation:** treat re-runs as additive. After a re-run, keep the most recent
-set (the IDs written by the latest run, visible on `main` after the sync commit)
-and delete the older duplicate collections in the Postman UI (right-click →
-Delete) to return to exactly three collections and one monitor.
+**Consequence — confirmed in the workspace:** because the workspace is reused
+but its contents are re-created, re-running **accumulates duplicates**. After
+five runs the reused workspace held **15 collections** (5× `[Baseline]`, 5×
+`[Contract]`, 5× `[Smoke]`) plus multiple duplicate `payment-refund-service -
+dev` environments — exactly 3 collections × 5 runs, piled into one workspace
+with no cleanup. Screenshot and caption in
+[`docs/VALIDATION-EVIDENCE.md`](docs/VALIDATION-EVIDENCE.md). This is the
+workspace-sprawl risk (R5/R7) reproduced live.
 
-**A durable fix** would mean capturing the action's step outputs (`workspace-id`,
-`spec-id`, `collections-json`) and re-supplying them on the next run, or an
-upstream change so the action persists and reuses them — out of scope for this
-exercise, and worth raising with the action's maintainers.
+**How to operate:** treat `onboard.yml` as **create-once per service**. To
+re-onboard, clear the prior workspace contents first — delete the older
+collections and environments in the Postman UI (right-click → Delete), or nuke
+and recreate the workspace — so you return to exactly three collections and one
+monitor. A production hardening — a pre-run reuse-or-clean guard keyed on the
+workspace git-sync link — is scoped in §12.
 
 ## 11. Known Issues and Resolutions
 
@@ -371,9 +373,13 @@ What I'd do differently with more time:
 - **Build the org-mode path.** The workflow has commented `org-mode: true` /
   `workspace-team-id` lines for org-scoped Postman teams. My team isn't
   org-mode, so I haven't exercised that code path.
-- **Add a workspace cleanup workflow.** During discovery, failed runs left
-  duplicate collections that had to be cleaned manually. A cleanup script
-  would help during pilot iterations across many services.
+- **Add a pre-run reuse-or-clean guard.** Re-running accumulates duplicates
+  because the workspace is reused but its contents are re-created every run
+  (§10) — not only when a run fails. A guard keyed on the workspace git-sync
+  link would, before provisioning, either detect the existing canonical objects
+  and refresh them in place or clear the prior set, returning the workspace to
+  exactly three collections and one monitor. That closes the workspace-sprawl
+  gap for cohort rollout across many services.
 - **Surface the PAT-rename issue earlier.** §11.A #5 should be in a
   pre-flight checklist for any customer engagement where repos are likely to
   be renamed during pilot.
@@ -394,10 +400,12 @@ because:
 - The workflow file is structurally identical across services (~6-8 input
   lines change between services with very different compute and auth — see
   `ADAPTATION.md` in the companion repo)
-- Onboarding is create-once per service: the open-alpha action is **not**
-  idempotent on re-run (it re-provisions and duplicates rather than reusing —
-  see §10), so cohort rollout should onboard each repo once and avoid
-  unnecessary re-runs until the action persists/reuses resource IDs upstream
+- Onboarding is create-once per service: on re-run the action reuses the
+  workspace via the git-sync link but re-creates — and therefore accumulates —
+  the spec, collections, mock, and monitor (it is **not** idempotent inside the
+  workspace; see §10). Cohort rollout should onboard each repo once and avoid
+  unnecessary re-runs; cohorting still holds because per-service config is the
+  only delta
 - Customer-side requirements (§7) are knowable upfront, so cohort planning
   reduces to bucketing services by spec freshness + auth pattern + CI platform
 
@@ -456,6 +464,15 @@ queries and dependency graphs.
   the first run after the rebuild's rename from `payments-postman-onboarding`
   to `jr-cse-payments-postman-onboarding`. **Fix:** added new repo name to
   the PAT's access list (no token regeneration needed). Logged as iteration #5.
+- **AI claimed re-runs are idempotent via persisted repo variables.** Observed
+  across multiple no-change runs (2026-05-29): the action writes **no** repo
+  variables (`gh variable list` shows only the two input variables, no
+  Postman-resource IDs); on re-run it reuses the workspace (`linked_match`) but
+  re-creates the spec, three collections, mock, and monitor with new IDs —
+  **accumulating duplicates** (five runs produced 15 collections in one
+  workspace; see §10 + `docs/VALIDATION-EVIDENCE.md`). Corrected README §10/§13
+  and SETUP §7/§9/troubleshooting to the observed behavior. The variables story
+  was never verified before — fixed here. Logged in `issues-log.md` 2026-05-29.
 
 ### Why this matters
 AI accelerated drafting by maybe 5x and was useful for the prose and the

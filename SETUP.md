@@ -270,11 +270,12 @@ Confirm **all six** items:
 | 6 | Monitor | Monitors section shows one monitor (scheduled or "Ready to run") |
 
 > 💡 **One run = three collections; re-runs add more.** Observed: this
-> open-alpha action is **not idempotent** on re-run — it provisions a fresh set
-> with new IDs each time rather than reusing existing assets (see README §10).
-> So 6/9/12 collections means the workflow ran multiple times, not that a check
-> "failed." `gh variable list` holds only the two input variables you set; no
-> `POSTMAN_*` resource-ID variables are written back:
+> open-alpha action reuses the **workspace** (git-sync `linked_match`) but
+> re-creates the spec, collections, mock, and monitor with new IDs each run, so
+> they **accumulate** — it is not idempotent inside the workspace (see README
+> §10). 6/9/12 collections means the workflow ran multiple times, not that a
+> check "failed." `gh variable list` holds only the two input variables you set;
+> no `POSTMAN_*` resource-ID variables are written back:
 > ```bash
 > gh variable list --repo $OWNER/jr-cse-payments-postman-onboarding
 > ```
@@ -341,11 +342,14 @@ RUN_ID=$(gh run list --repo $OWNER/jr-cse-payments-postman-onboarding --workflow
 gh run watch "$RUN_ID" --repo $OWNER/jr-cse-payments-postman-onboarding
 ```
 
-After it goes green, compare the workspace before/after. **Observed on this
-repo:** the re-run created a *new* set of collections (the committed
-`collection.yaml` IDs changed) and the workspace gained duplicates — the action
-does not persist/reuse resource IDs (`gh variable list` shows only the two input
-variables). See README §10 for the full write-up.
+After it goes green, compare the two runs' outputs and the workspace
+before/after. **Observed on this repo:** the **workspace ID is stable** (reused
+via the git-sync `linked_match`) while the **child IDs change** — the committed
+`collection.yaml` `id`s differ each run — and the workspace **accumulates**
+duplicate collections and environments. The action persists/reuses no resource
+IDs (`gh variable list` shows only the two input variables, never updated by a
+run). Confirm in the Postman UI whether the collection count grew. See README
+§10 for the full write-up.
 
 This observation is your answer to Q&A question 5 ("What happens on re-run?
 Do you get duplicate workspaces?"). Record exactly what you see in README §10.
@@ -431,12 +435,12 @@ If the run actually fails because of an org-mode mismatch, see the commented
 
 ### Multiple sets of collections in the workspace
 
-This open-alpha action is **not idempotent** — each run provisions a fresh set
-of collections with new IDs (it does not persist/reuse resource IDs as repo
-variables; see README §10). Duplicates are therefore expected after any re-run,
-not a sign of a failed step. Clean up manually in the Postman UI: right-click
-each older duplicate → Delete, keeping the most recent Baseline, Contract, and
-Smoke.
+This open-alpha action reuses the **workspace** but re-creates its contents:
+each run provisions a fresh set of collections with new IDs and does **not**
+persist/reuse resource IDs as repo variables (see README §10). Duplicates are
+therefore expected after any re-run — they **accumulate** — not a sign of a
+failed step. Clean up manually in the Postman UI: right-click each older
+duplicate → Delete, keeping the most recent Baseline, Contract, and Smoke.
 
 Until the action persists IDs upstream, avoid unnecessary re-runs (onboard once
 per service); a re-run will duplicate again.

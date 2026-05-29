@@ -268,3 +268,28 @@ For the companion (Loan Origination) workspace, the equivalent five
 screenshots and walkthrough live in
 [`jr-cse-loan-origination-postman-onboarding/docs/VALIDATION-EVIDENCE.md`](https://github.com/JeremiahJRRoss/jr-cse-loan-origination-postman-onboarding/blob/main/docs/VALIDATION-EVIDENCE.md).
 The visual diff between the two workspaces is `ADAPTATION.md` rendered.
+
+---
+
+## 6. Rerun accumulation — the workspace-sprawl risk made visible
+
+> **Unguarded re-runs accumulate — 5 runs → 15 collections in one workspace.
+> R5/R7 made visible; mitigation in README §10/§12.**
+
+![[PMT] payment-refund-service workspace after five no-change onboarding runs — 15 collections (5x Baseline, 5x Contract, 5x Smoke) plus multiple duplicate payment-refund-service - dev environments](screenshots/rerun-accumulation-15-collections.png)
+
+Unlike the five shots above — captured from a single clean run — this one is
+the *defect* on purpose. Re-running `onboard.yml` with no source changes reuses
+the workspace (run log: `Using canonical workspace (linked_match)`) but
+re-creates the spec, all three collections, the mock, and the monitor with new
+IDs every time. After five runs the workspace held **15 collections** — exactly
+3 × 5 — plus duplicate `payment-refund-service - dev` environments.
+
+This is the rerun/idempotency finding (README §10) shown in the UI: there is no
+stored-ID persistence, so nothing is reused in place and everything piles up.
+The shot is a point-in-time capture at five runs — further test runs afterward
+pushed the count higher still, which only sharpens the point. For the live demo
+the workspace is reset to one clean run (exactly three collections); this
+screenshot is retained as the evidence of why "create-once per service" is the
+operating rule and why a pre-run reuse-or-clean guard (README §12) is the
+production hardening.
