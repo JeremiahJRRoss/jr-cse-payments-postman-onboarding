@@ -231,8 +231,9 @@ Confirmed on this repo:
 ### 11.A — Build iterations (issues that required code/config changes)
 
 Five iterations were needed during initial discovery to land the verified
-working workflow. Each exposed a real discrepancy between the action's
-declared contract and its runtime behavior — documented in `issues-log.md`.
+working workflow; a sixth surfaced during submission review. Each exposed a
+real discrepancy between the action's declared contract and its runtime
+behavior — documented in `issues-log.md`.
 
 1. **`variables: write` is not a valid GitHub Actions permission key.**
    The job-level `permissions:` block has a fixed allow-list; `variables`
@@ -265,10 +266,25 @@ declared contract and its runtime behavior — documented in `issues-log.md`.
    customer-side ask for any engagement where onboarded repos might get
    renamed — surfaced in §7 #3.
 
-**Pattern across all five:** open-alpha tooling has loose `action.yml`
+6. **Repo-sync emitted the generated CI workflow as one escaped line.**
+   `.github/workflows/payments-tests.yml` was committed by the repo-sync phase
+   as a single physical line with 90 literal `\n` sequences instead of real
+   newlines — invalid YAML (`ScannerError ... line 1, column 49`), which
+   GitHub flags as "Invalid workflow file" so it never registers or runs.
+   The defect is byte-identical in the companion repo, confirming it's an
+   upstream open-alpha serialization bug, not a local commit slip. **Fix:**
+   decoded `\n` → real newlines in place, verified lossless against the
+   committed original (re-encode == prior commit; 4370→4280 bytes) and that
+   it parses with valid `on` + `jobs.test`. Because this is an
+   action-generated artifact, the correction is logged here and in
+   `issues-log.md` rather than applied silently. Refs: submission review
+   item 1, layer 1.
+
+**Pattern across all six:** open-alpha tooling has loose `action.yml`
 validation but stricter runtime requirements in the chained downstream
-actions. The reliable verification is running it; the unreliable one is
-trusting the declared contract.
+actions, and the sync phase can serialize generated artifacts incorrectly.
+The reliable verification is running it (and parsing the output); the
+unreliable one is trusting the declared contract.
 
 ### 11.B — Annotations on green runs (informational, not blocking)
 
@@ -335,6 +351,11 @@ What I'd do differently with more time:
 - **Surface the PAT-rename issue earlier.** §11.A #5 should be in a
   pre-flight checklist for any customer engagement where repos are likely to
   be renamed during pilot.
+- **Self-heal the escaped-workflow defect (§11.A #6).** The durable fix is a
+  post-generation decode step in `onboard.yml` so re-runs repair the escaped
+  `payments-tests.yml` automatically, plus reporting the escaping to the
+  upstream repo-sync maintainers. Out of scope for the take-home, but the
+  right productionizing move so the manual decode isn't needed on every sync.
 
 ## 13. Scaling Considerations
 
