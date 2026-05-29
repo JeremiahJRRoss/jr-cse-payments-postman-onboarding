@@ -34,7 +34,7 @@ Three repo-level secrets and two repo variables drive the workflow:
 ## 2. Services Onboarded
 
 - **Payments (Refund API)** — this repo. Lambda + API Gateway compute, OAuth 2.0 + JWT auth declared in spec.
-- **Loan Origination** — companion repo `loan-origination-postman-onboarding`. Demonstrates pattern transfer to ECS+ALB compute and JWT auth (mTLS handled via the action's `ssl-client-*` inputs as customer-side cert provisioning).
+- **Loan Origination** — companion repo [`jr-cse-loan-origination-postman-onboarding`](https://github.com/JeremiahJRRoss/jr-cse-loan-origination-postman-onboarding). Demonstrates pattern transfer to ECS+ALB compute and JWT auth (mTLS handled via the action's `ssl-client-*` inputs as customer-side cert provisioning).
 
 ## 3. Repository Structure
 
