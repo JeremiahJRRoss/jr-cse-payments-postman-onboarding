@@ -98,3 +98,14 @@ variables are persisted. Run log shows no variable-write attempt and no 403.
 ```
 **Changed:** No code change. The candidate fix (github-token → GH_FALLBACK_TOKEN) was investigated and ruled out — the action logs no variable-write attempt, so this isn't a token-permission failure. Instead documented the observed non-idempotent behavior across every surface that carried the old claim: README §10 + §13, SETUP.md (Step 7 tip, Step 9, troubleshooting, checklist), and VERIFIED-NOTES.md.
 **Source of fix:** experiment (observed re-run) + inspection (commit diff, `gh variable list`, run-log grep). Honest disclosure: re-runs duplicate; a durable fix is upstream (action must persist/reuse resource IDs) or a custom output-capture layer — out of scope here. Refs: submission review item 4/5 (rerun behavior).
+
+### 2026-05-29 — re-run regenerated payments-tests.yml as the escaped single line again (item 1 regression)
+**Tried:** Same idempotency re-run above (run 26652077213). Checked the regenerated CI workflow afterward.
+**Error:**
+```
+Sync commit 6fa0606 rewrote .github/workflows/payments-tests.yml back to one
+escaped physical line (0 newlines, 90 literal \n, invalid YAML) — exactly the
+item-1 defect, regenerated on re-run, overwriting the committed decode on main.
+```
+**Changed:** Re-applied the item-1 decode (lossless, verified vs 6fa0606: 4370→4280 bytes; parses with on + jobs.test) and committed it back to main.
+**Source of fix:** experiment + inspection. This is direct confirmation of the item-1 §12 trade-off: repo-sync re-escapes the file every run, so the durable fix is a post-generation decode step inside `onboard.yml` (self-heal) plus reporting the escaping upstream. Refs: submission review item 1 (recurrence), item 4/5.
