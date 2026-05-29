@@ -1,23 +1,30 @@
 # Verified Action Contract Notes
 
-Captured by inspecting `postman-cs/postman-api-onboarding-action/action.yml` and
-README directly. Where these notes conflict with BLUEPRINT.md / PROMPTS.md (written
-earlier), **these notes win** — they're from the live action.
+Facts checked against the live `action.yml` on 2026-05-29. **The committed
+`onboard.yml` is the source of truth for the contract; this file annotates why
+each input is set.** Where this file and `onboard.yml` disagree, `onboard.yml`
+wins and this file is wrong — fix it.
 
 ## Version pin
 - Only `@v0` exists (rolling open-alpha). No immutable `v0.x.y` tags published yet.
 - Earlier docs referencing `@v1` were wrong. Use `@v0`.
 
-## Spec input: spec-path vs spec-url
-- The action accepts EITHER `spec-url` (fetchable HTTPS) OR `spec-path` (repo-root
-  relative, read from the checked-out workspace).
-- This scaffold uses **`spec-path`** — more robust, no dependency on the raw URL
-  being reachable/public before the run.
+## Spec input: spec-url vs spec-path
+- action.yml accepts **either**: `spec-url` (HTTPS) **or** `spec-path` (repo-root
+  relative; used as the bootstrap source "when spec-url is not provided").
+- This scaffold's `onboard.yml` provides **both**. Rationale in README §11.A #2 /
+  §14: under the open-alpha build the run was observed to require `spec-url` at
+  runtime even though action.yml marks it optional, so both are supplied as the
+  safe superset. (action.yml documents spec-path-alone as sufficient; if you
+  re-confirm that, you may drop spec-url — but the committed contract is both.)
 
 ## Permissions
-- Needs `actions: write`, `contents: write`, AND `variables: write`.
-  The `variables: write` is what lets the action persist workspace/spec/collection
-  IDs as repo variables for idempotent re-runs.
+- The job needs `actions: write` and `contents: write` **only**.
+- GitHub Actions has **no `variables` permission key** (a `variables: write`
+  line is rejected: "Unexpected value 'variables'"). Repo variables are written
+  by the action via the GitHub API using `github-token` / `gh-fallback-token` —
+  action.yml: "GitHub token used for repo variables and generated commits." See
+  onboard.yml's inline note and README §11.A #1.
 
 ## ci-workflow-path
 - Default is `.github/workflows/ci.yml` (NOT `onboard.yml`). The earlier
@@ -42,10 +49,13 @@ earlier), **these notes win** — they're from the live action.
   from customer-provided secrets — correct behavior, not a gap.
 
 ## starter-assets bug (why we bypass it — decision D2)
-- `starter-assets/actions/onboard-service/action.yml` line ~35 passes
-  `spec-url: ${{ inputs.spec-path }}` — feeds a local path into the URL input.
-  If you pass only a path, it lands in spec-url (expects HTTPS) and fails.
-  We call the upstream action directly and use spec-path correctly.
+- Per the starter README / D2 rationale (not re-verified here — the
+  starter-assets path returned HTTP 404 on 2026-05-29): the starter's
+  `onboard-service/action.yml` wraps the upstream action and was reported to
+  pass `spec-url: ${{ inputs.spec-path }}`, feeding a local path into the URL
+  input, which expects HTTPS.
+- We bypass the starter and call `postman-cs/postman-api-onboarding-action@v0`
+  directly, supplying **both** `spec-url` and `spec-path` (see Spec input above).
 
 ## checkout version
 - Official examples use `actions/checkout@v5`. This scaffold uses v5.
