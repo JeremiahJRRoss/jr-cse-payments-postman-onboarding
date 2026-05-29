@@ -29,8 +29,9 @@ wins and this file is wrong — fix it.
   the *declared* contract. In practice the action wrote **no** `POSTMAN_*`
   workspace/spec/collection-ID variables on this repo (`gh variable list` shows
   only the two input variables), and the run log logs no variable-write attempt —
-  so re-runs re-provision and duplicate rather than reuse. Idempotency is **not**
-  observed here; see README §10.
+  so re-runs reuse the workspace (via the git-sync `linked_match`) but re-create
+  and **accumulate** its contents (spec, collections, mock, monitor) rather than
+  reusing them. Idempotency is **not** observed here; see README §10.
 
 ## ci-workflow-path
 - Default is `.github/workflows/ci.yml` (NOT `onboard.yml`). The earlier

@@ -109,3 +109,22 @@ item-1 defect, regenerated on re-run, overwriting the committed decode on main.
 ```
 **Changed:** Re-applied the item-1 decode (lossless, verified vs 6fa0606: 4370→4280 bytes; parses with on + jobs.test) and committed it back to main.
 **Source of fix:** experiment + inspection. This is direct confirmation of the item-1 §12 trade-off: repo-sync re-escapes the file every run, so the durable fix is a post-generation decode step inside `onboard.yml` (self-heal) plus reporting the escaping upstream. Refs: submission review item 1 (recurrence), item 4/5.
+
+### 2026-05-29 — rerun behavior locked: workspace reused (linked_match), children accumulate, no repo variables; empty bootstrap/repo-sync outcomes
+**Tried:** Pinning down rerun/idempotency behavior across several no-change `onboard.yml` runs (the "persists IDs as repo variables → idempotent" claim had never been verified), then reconciling the result in the Postman UI.
+**Error:**
+```
+- Workspace REUSED across runs — run log: "Using canonical workspace (linked_match)";
+  matched via the repo<->workspace git-sync link, not via any stored ID.
+- Spec, all three collections, mock, and monitor RE-CREATED with new IDs every run
+  ("Created new mock", "Created new monitor"; the sync commit rewrites each collection.yaml id).
+- ZERO GitHub repo variables written — `gh variable list` shows only the two input vars
+  (POSTMAN_USER_ID, REQUESTER_EMAIL); no POSTMAN_* resource-ID vars, no write attempt, no 403.
+- UI-confirmed ACCUMULATION: after 5 runs the reused workspace held 15 collections
+  (5x Baseline / Contract / Smoke) + multiple duplicate "payment-refund-service - dev" environments.
+- Secondary (§0.3): the Print step's `bootstrap-outcome` / `repo-sync-outcome` outputs came back
+  EMPTY both runs — the orchestrator doesn't populate those output names, though the run still
+  produced every artifact. /run-and-watch treats empty outcomes as a red flag; here it isn't one.
+```
+**Changed:** No code change (`onboard.yml` untouched). Documentation correction only: rewrote README §10 to the observed behavior (workspace reused via the git-sync link; spec/collections/mock/monitor re-created and accumulating), corrected §13, fixed §12's cleanup bullet, added the §14 AI-disclosure entry, aligned SETUP §7/§9/troubleshooting and VERIFIED-NOTES, and added the 15-collections accumulation evidence to docs/VALIDATION-EVIDENCE.md.
+**Source of fix:** experiment (multiple re-runs) + inspection (run log "linked_match", `gh variable list`, sync-commit `id` diffs) + UI confirmation (collection count). Honest disclosure: re-runs accumulate; the durable fix is a pre-run reuse-or-clean guard or upstream ID persistence — out of scope here. Refs: submission review item 5 (feeds items 2, 3, plan Q5).
