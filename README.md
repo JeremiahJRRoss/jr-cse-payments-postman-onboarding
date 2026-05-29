@@ -46,10 +46,14 @@ jr-cse-payments-postman-onboarding/
 ├── specs/
 │   └── payment-refund-api-openapi.yaml
 ├── postman/
-│   └── collections/            # JSON exports committed by the action's repo-sync phase
-│       ├── [Baseline] payment-refund-service.json
-│       ├── [Contract] payment-refund-service.json
-│       └── [Smoke] payment-refund-service.json
+│   ├── collections/            # canonical git-sync YAML (action-managed; the workflow reads/writes these)
+│   │   ├── [Baseline] payment-refund-service/   # collection.yaml + *.request.yaml
+│   │   ├── [Contract] payment-refund-service/
+│   │   └── [Smoke] payment-refund-service/
+│   └── exports/                # single-file v2.1 JSON of the same collections (per the brief)
+│       ├── baseline.json
+│       ├── contract.json
+│       └── smoke.json
 ├── docs/screenshots/           # validation evidence (see §9)
 ├── service.config.yml          # per-service inputs documented (no secrets)
 ├── issues-log.md               # honest build log — iterations, errors, fixes
@@ -200,13 +204,17 @@ https://github.com/JeremiahJRRoss/jr-cse-payments-postman-onboarding/actions/run
 — 38 seconds, single attempt, all six job steps passed.
 
 **Committed artifacts** (committed back by the action's repo-sync phase):
-- [`postman/collections/`](postman/collections/) — three JSON exports (Baseline, Contract, Smoke)
+- [`postman/collections/`](postman/collections/) — three git-sync YAML collections (Baseline, Contract, Smoke), the action's canonical format
 - [`.github/workflows/payments-tests.yml`](.github/workflows/payments-tests.yml) — generated CI workflow
 
-**Walkthrough with all five screenshots:** [`docs/VALIDATION-EVIDENCE.md`](docs/VALIDATION-EVIDENCE.md)
+The same three collections are also provided as single-file v2.1 JSON in
+`postman/exports/` ([`baseline.json`](postman/exports/baseline.json),
+[`contract.json`](postman/exports/contract.json),
+[`smoke.json`](postman/exports/smoke.json)) — the JSON the brief asks for. They
+are taken from the same run whose YAML is committed here, so the two formats
+correspond.
 
-<!-- item 6: §9 says "JSON exports" but the committed collections are YAML directory trees
-     (collection.yaml + *.request.yaml). Reconcile JSON-vs-YAML wording separately. -->
+**Walkthrough with all five screenshots:** [`docs/VALIDATION-EVIDENCE.md`](docs/VALIDATION-EVIDENCE.md)
 
 ## 10. Rerun / Idempotency Behavior
 

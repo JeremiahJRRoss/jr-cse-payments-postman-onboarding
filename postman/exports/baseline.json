@@ -1,0 +1,2059 @@
+{
+  "info": {
+    "_postman_id": "8ed6bcc0-3da6-442d-8623-f1e650e22187",
+    "name": "[Baseline] payment-refund-service",
+    "description": "Comprehensive API for managing payment refunds in a financial services platform.\nThis API handles refund creation, status tracking, cancellation, and reporting for\npayment transactions processed through the authorization and capture workflow.\n\n**Authentication:**\n- External partners: OAuth 2.0 (Bearer token)\n- Internal services: JWT token (Bearer token)\n\n**Rate Limits:**\n- Standard tier: 100 requests/minute\n- Enterprise tier: 1000 requests/minute\n\n\nContact Support:\n Name: Payment Platform Team\n Email: payment-platform@example.com",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-05-29T18:25:32.000Z",
+    "updatedAt": "2026-05-29T18:25:48.000Z",
+    "lastUpdatedBy": "38960911",
+    "uid": "38960911-8ed6bcc0-3da6-442d-8623-f1e650e22187"
+  },
+  "item": [
+    {
+      "name": "refunds",
+      "item": [
+        {
+          "name": "{refundId}",
+          "item": [
+            {
+              "name": "status",
+              "item": [
+                {
+                  "name": "Get refund status",
+                  "id": "8640dfe1-4bbe-4ec9-90d2-10b5065059d7",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/refunds/:refundId/status",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "refunds",
+                        ":refundId",
+                        "status"
+                      ],
+                      "variable": [
+                        {
+                          "key": "refundId",
+                          "value": "rfnd_abc123def456",
+                          "description": "Unique identifier for the refund"
+                        }
+                      ]
+                    },
+                    "description": "Retrieves the current status of a refund. This is a lightweight endpoint\noptimized for frequent polling. Returns minimal data compared to the full\nrefund details endpoint.\n"
+                  },
+                  "response": [
+                    {
+                      "id": "db193d85-c325-4f6d-950b-ef5cc42f3fe4",
+                      "name": "Refund status retrieved successfully",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/refunds/:refundId/status",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "refunds",
+                            ":refundId",
+                            "status"
+                          ],
+                          "variable": [
+                            {
+                              "key": "refundId",
+                              "value": "rfnd_abc123def456",
+                              "description": "Unique identifier for the refund"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"refundId\": \"rfnd_xyz789ghi012\",\n  \"status\": \"pending\",\n  \"updatedAt\": \"2024-01-15T11:00:00Z\",\n  \"estimatedCompletionTime\": \"2024-01-15T15:00:00Z\"\n}",
+                      "createdAt": "2026-05-29T18:25:33.000Z",
+                      "updatedAt": "2026-05-29T18:25:33.000Z",
+                      "uid": "38960911-db193d85-c325-4f6d-950b-ef5cc42f3fe4"
+                    },
+                    {
+                      "id": "21450bd9-3e4f-4a3e-80af-d55c8e744e29",
+                      "name": "Unauthorized - Invalid or missing authentication",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/refunds/:refundId/status",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "refunds",
+                            ":refundId",
+                            "status"
+                          ],
+                          "variable": [
+                            {
+                              "key": "refundId",
+                              "value": "rfnd_abc123def456",
+                              "description": "Unique identifier for the refund"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"Authentication token is required\",\n  \"code\": \"AUTHENTICATION_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                      "createdAt": "2026-05-29T18:25:33.000Z",
+                      "updatedAt": "2026-05-29T18:25:33.000Z",
+                      "uid": "38960911-21450bd9-3e4f-4a3e-80af-d55c8e744e29"
+                    },
+                    {
+                      "id": "3a487224-c518-4c43-a08f-2f231592bf4e",
+                      "name": "Refund not found",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/refunds/:refundId/status",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "refunds",
+                            ":refundId",
+                            "status"
+                          ],
+                          "variable": [
+                            {
+                              "key": "refundId",
+                              "value": "rfnd_abc123def456",
+                              "description": "Unique identifier for the refund"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Not Found",
+                      "code": 404,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"REFUND_NOT_FOUND\",\n  \"message\": \"The specified refund was not found\",\n  \"details\": {\n    \"refundId\": \"rfnd_invalid123\"\n  },\n  \"code\": \"RESOURCE_NOT_FOUND\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                      "createdAt": "2026-05-29T18:25:33.000Z",
+                      "updatedAt": "2026-05-29T18:25:33.000Z",
+                      "uid": "38960911-3a487224-c518-4c43-a08f-2f231592bf4e"
+                    },
+                    {
+                      "id": "ba76a5a9-3931-4a68-808f-5ade9dbc91a0",
+                      "name": "Internal server error",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/refunds/:refundId/status",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "refunds",
+                            ":refundId",
+                            "status"
+                          ],
+                          "variable": [
+                            {
+                              "key": "refundId",
+                              "value": "rfnd_abc123def456",
+                              "description": "Unique identifier for the refund"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Internal Server Error",
+                      "code": 500,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"INTERNAL_SERVER_ERROR\",\n  \"message\": \"An unexpected error occurred\",\n  \"details\": {\n    \"requestId\": \"req_abc123def456\"\n  },\n  \"code\": \"SERVER_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                      "createdAt": "2026-05-29T18:25:33.000Z",
+                      "updatedAt": "2026-05-29T18:25:33.000Z",
+                      "uid": "38960911-ba76a5a9-3931-4a68-808f-5ade9dbc91a0"
+                    }
+                  ],
+                  "createdAt": "2026-05-29T18:25:33.000Z",
+                  "updatedAt": "2026-05-29T18:25:33.000Z",
+                  "uid": "38960911-8640dfe1-4bbe-4ec9-90d2-10b5065059d7"
+                }
+              ],
+              "id": "b04df149-0d6f-459b-8593-ada8b82cc2db",
+              "createdAt": "2026-05-29T18:25:32.000Z",
+              "updatedAt": "2026-05-29T18:25:32.000Z",
+              "uid": "38960911-b04df149-0d6f-459b-8593-ada8b82cc2db"
+            },
+            {
+              "name": "cancel",
+              "item": [
+                {
+                  "name": "Cancel a pending refund",
+                  "id": "60bb6b64-a9ce-4e0e-90d0-0ae5b442228c",
+                  "protocolProfileBehavior": {
+                    "disableBodyPruning": true
+                  },
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"reason\": \"Customer changed mind and wants to keep the item\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/refunds/:refundId/cancel",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "refunds",
+                        ":refundId",
+                        "cancel"
+                      ],
+                      "variable": [
+                        {
+                          "key": "refundId",
+                          "value": "rfnd_abc123def456",
+                          "description": "Unique identifier for the refund"
+                        }
+                      ]
+                    },
+                    "description": "Cancels a refund that is in 'pending' status. Once a refund has started\nprocessing or is completed, it cannot be cancelled. The refund will be\nimmediately moved to 'cancelled' status.\n"
+                  },
+                  "response": [
+                    {
+                      "id": "bd091d57-a0b8-420a-a8ca-216738f9ceb3",
+                      "name": "Refund cancelled successfully",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"reason\": \"Customer changed mind and wants to keep the item\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/refunds/:refundId/cancel",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "refunds",
+                            ":refundId",
+                            "cancel"
+                          ],
+                          "variable": [
+                            {
+                              "key": "refundId",
+                              "value": "rfnd_abc123def456",
+                              "description": "Unique identifier for the refund"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"refundId\": \"rfnd_xyz789ghi012\",\n  \"transactionId\": \"txn_0987654321fedcba\",\n  \"status\": \"cancelled\",\n  \"amount\": 5000,\n  \"currency\": \"USD\",\n  \"refundAmount\": 2500,\n  \"refundCurrency\": \"USD\",\n  \"reason\": \"Partial refund for damaged item\",\n  \"createdAt\": \"2024-01-15T11:00:00Z\",\n  \"updatedAt\": \"2024-01-15T11:30:00Z\",\n  \"cancelledAt\": \"2024-01-15T11:30:00Z\",\n  \"cancellationReason\": \"Customer changed mind and wants to keep the item\",\n  \"links\": {\n    \"self\": \"/refunds/rfnd_xyz789ghi012\"\n  }\n}",
+                      "createdAt": "2026-05-29T18:25:33.000Z",
+                      "updatedAt": "2026-05-29T18:25:33.000Z",
+                      "uid": "38960911-bd091d57-a0b8-420a-a8ca-216738f9ceb3"
+                    },
+                    {
+                      "id": "92751b2b-ba57-4945-ae46-0f1124c24ff1",
+                      "name": "Bad request - Cannot cancel refund",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"reason\": \"Customer changed mind and wants to keep the item\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/refunds/:refundId/cancel",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "refunds",
+                            ":refundId",
+                            "cancel"
+                          ],
+                          "variable": [
+                            {
+                              "key": "refundId",
+                              "value": "rfnd_abc123def456",
+                              "description": "Unique identifier for the refund"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Bad Request",
+                      "code": 400,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"REFUND_CANNOT_BE_CANCELLED\",\n  \"message\": \"Only pending refunds can be cancelled\",\n  \"details\": {\n    \"refundId\": \"rfnd_abc123def456\",\n    \"currentStatus\": \"processing\",\n    \"allowedStatuses\": [\n      \"pending\"\n    ]\n  },\n  \"code\": \"BUSINESS_RULE_VIOLATION\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                      "createdAt": "2026-05-29T18:25:33.000Z",
+                      "updatedAt": "2026-05-29T18:25:33.000Z",
+                      "uid": "38960911-92751b2b-ba57-4945-ae46-0f1124c24ff1"
+                    },
+                    {
+                      "id": "1ccae560-fc29-4dbc-8bed-ae7e456e8c88",
+                      "name": "Unauthorized - Invalid or missing authentication",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"reason\": \"Customer changed mind and wants to keep the item\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/refunds/:refundId/cancel",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "refunds",
+                            ":refundId",
+                            "cancel"
+                          ],
+                          "variable": [
+                            {
+                              "key": "refundId",
+                              "value": "rfnd_abc123def456",
+                              "description": "Unique identifier for the refund"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unauthorized",
+                      "code": 401,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"Authentication token is required\",\n  \"code\": \"AUTHENTICATION_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                      "createdAt": "2026-05-29T18:25:33.000Z",
+                      "updatedAt": "2026-05-29T18:25:33.000Z",
+                      "uid": "38960911-1ccae560-fc29-4dbc-8bed-ae7e456e8c88"
+                    },
+                    {
+                      "id": "6f8b22d6-1d92-4a0c-88e5-4b51b1fd2d86",
+                      "name": "Refund not found",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"reason\": \"Customer changed mind and wants to keep the item\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/refunds/:refundId/cancel",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "refunds",
+                            ":refundId",
+                            "cancel"
+                          ],
+                          "variable": [
+                            {
+                              "key": "refundId",
+                              "value": "rfnd_abc123def456",
+                              "description": "Unique identifier for the refund"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Not Found",
+                      "code": 404,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"REFUND_NOT_FOUND\",\n  \"message\": \"The specified refund was not found\",\n  \"details\": {\n    \"refundId\": \"rfnd_invalid123\"\n  },\n  \"code\": \"RESOURCE_NOT_FOUND\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                      "createdAt": "2026-05-29T18:25:33.000Z",
+                      "updatedAt": "2026-05-29T18:25:33.000Z",
+                      "uid": "38960911-6f8b22d6-1d92-4a0c-88e5-4b51b1fd2d86"
+                    },
+                    {
+                      "id": "f83a0f1e-e391-4eaa-996c-8914c9f69b2f",
+                      "name": "Internal server error",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"reason\": \"Customer changed mind and wants to keep the item\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/refunds/:refundId/cancel",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "refunds",
+                            ":refundId",
+                            "cancel"
+                          ],
+                          "variable": [
+                            {
+                              "key": "refundId",
+                              "value": "rfnd_abc123def456",
+                              "description": "Unique identifier for the refund"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Internal Server Error",
+                      "code": 500,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "responseTime": null,
+                      "body": "{\n  \"error\": \"INTERNAL_SERVER_ERROR\",\n  \"message\": \"An unexpected error occurred\",\n  \"details\": {\n    \"requestId\": \"req_abc123def456\"\n  },\n  \"code\": \"SERVER_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                      "createdAt": "2026-05-29T18:25:33.000Z",
+                      "updatedAt": "2026-05-29T18:25:33.000Z",
+                      "uid": "38960911-f83a0f1e-e391-4eaa-996c-8914c9f69b2f"
+                    }
+                  ],
+                  "createdAt": "2026-05-29T18:25:33.000Z",
+                  "updatedAt": "2026-05-29T18:25:33.000Z",
+                  "uid": "38960911-60bb6b64-a9ce-4e0e-90d0-0ae5b442228c"
+                }
+              ],
+              "id": "2c736475-d079-4589-a346-5f2d6e363fc8",
+              "createdAt": "2026-05-29T18:25:32.000Z",
+              "updatedAt": "2026-05-29T18:25:32.000Z",
+              "uid": "38960911-2c736475-d079-4589-a346-5f2d6e363fc8"
+            },
+            {
+              "name": "Get refund details",
+              "id": "70e04186-4c2f-49a3-99e9-04389052e58b",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/refunds/:refundId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds",
+                    ":refundId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "refundId",
+                      "value": "rfnd_abc123def456",
+                      "description": "Unique identifier for the refund"
+                    }
+                  ]
+                },
+                "description": "Retrieves detailed information about a specific refund by its ID.\nIncludes full status history, processing details, and related transaction information.\n"
+              },
+              "response": [
+                {
+                  "id": "eb779f88-69ee-4300-a1f6-222b82aed8a3",
+                  "name": "Refund details retrieved successfully",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/refunds/:refundId",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "refunds",
+                        ":refundId"
+                      ],
+                      "variable": [
+                        {
+                          "key": "refundId",
+                          "value": "rfnd_abc123def456",
+                          "description": "Unique identifier for the refund"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "responseTime": null,
+                  "body": "{\n  \"refundId\": \"rfnd_abc123def456\",\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"status\": \"completed\",\n  \"amount\": 5000,\n  \"currency\": \"USD\",\n  \"refundAmount\": 5000,\n  \"refundCurrency\": \"USD\",\n  \"reason\": \"Customer requested refund\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\",\n  \"updatedAt\": \"2024-01-15T14:25:00Z\",\n  \"completedAt\": \"2024-01-15T14:25:00Z\",\n  \"processingTime\": 14520,\n  \"statusHistory\": [\n    {\n      \"status\": \"pending\",\n      \"timestamp\": \"2024-01-15T10:30:00Z\",\n      \"message\": \"Refund request created\"\n    },\n    {\n      \"status\": \"processing\",\n      \"timestamp\": \"2024-01-15T12:00:00Z\",\n      \"message\": \"Refund processing initiated\"\n    },\n    {\n      \"status\": \"completed\",\n      \"timestamp\": \"2024-01-15T14:25:00Z\",\n      \"message\": \"Refund processed successfully\"\n    }\n  ],\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\",\n    \"paymentGatewayRefundId\": \"pg_rfnd_789xyz\"\n  },\n  \"links\": {\n    \"self\": \"/refunds/rfnd_abc123def456\",\n    \"transaction\": \"/transactions/txn_1234567890abcdef\"\n  }\n}",
+                  "createdAt": "2026-05-29T18:25:33.000Z",
+                  "updatedAt": "2026-05-29T18:25:33.000Z",
+                  "uid": "38960911-eb779f88-69ee-4300-a1f6-222b82aed8a3"
+                },
+                {
+                  "id": "bbbfb3e0-0a32-489b-a6d7-06670359e9c6",
+                  "name": "Unauthorized - Invalid or missing authentication",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/refunds/:refundId",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "refunds",
+                        ":refundId"
+                      ],
+                      "variable": [
+                        {
+                          "key": "refundId",
+                          "value": "rfnd_abc123def456",
+                          "description": "Unique identifier for the refund"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "responseTime": null,
+                  "body": "{\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"Authentication token is required\",\n  \"code\": \"AUTHENTICATION_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                  "createdAt": "2026-05-29T18:25:33.000Z",
+                  "updatedAt": "2026-05-29T18:25:33.000Z",
+                  "uid": "38960911-bbbfb3e0-0a32-489b-a6d7-06670359e9c6"
+                },
+                {
+                  "id": "c155c07f-1c5f-4050-9330-99bacf4adc26",
+                  "name": "Refund not found",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/refunds/:refundId",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "refunds",
+                        ":refundId"
+                      ],
+                      "variable": [
+                        {
+                          "key": "refundId",
+                          "value": "rfnd_abc123def456",
+                          "description": "Unique identifier for the refund"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Not Found",
+                  "code": 404,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "responseTime": null,
+                  "body": "{\n  \"error\": \"REFUND_NOT_FOUND\",\n  \"message\": \"The specified refund was not found\",\n  \"details\": {\n    \"refundId\": \"rfnd_invalid123\",\n    \"suggestion\": \"Verify the refund ID and try again\"\n  },\n  \"code\": \"RESOURCE_NOT_FOUND\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                  "createdAt": "2026-05-29T18:25:33.000Z",
+                  "updatedAt": "2026-05-29T18:25:33.000Z",
+                  "uid": "38960911-c155c07f-1c5f-4050-9330-99bacf4adc26"
+                },
+                {
+                  "id": "1f5904fb-5325-4752-8024-f6e8dcb4cdb6",
+                  "name": "Internal server error",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/refunds/:refundId",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "refunds",
+                        ":refundId"
+                      ],
+                      "variable": [
+                        {
+                          "key": "refundId",
+                          "value": "rfnd_abc123def456",
+                          "description": "Unique identifier for the refund"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Internal Server Error",
+                  "code": 500,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "responseTime": null,
+                  "body": "{\n  \"error\": \"INTERNAL_SERVER_ERROR\",\n  \"message\": \"An unexpected error occurred\",\n  \"details\": {\n    \"requestId\": \"req_abc123def456\"\n  },\n  \"code\": \"SERVER_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+                  "createdAt": "2026-05-29T18:25:33.000Z",
+                  "updatedAt": "2026-05-29T18:25:33.000Z",
+                  "uid": "38960911-1f5904fb-5325-4752-8024-f6e8dcb4cdb6"
+                }
+              ],
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-70e04186-4c2f-49a3-99e9-04389052e58b"
+            }
+          ],
+          "id": "885aca20-11b6-4749-be04-ded5699ecb94",
+          "createdAt": "2026-05-29T18:25:32.000Z",
+          "updatedAt": "2026-05-29T18:25:32.000Z",
+          "uid": "38960911-885aca20-11b6-4749-be04-ded5699ecb94"
+        },
+        {
+          "name": "Create a new refund",
+          "id": "04d74c94-d743-4ab0-8970-63b0fb0be189",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/refunds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "refunds"
+              ]
+            },
+            "description": "Initiates a refund for a previously captured payment transaction. The refund\ncan be for the full amount or a partial amount. The refund status will be\n'pending' initially and transition to 'completed' or 'failed' based on\nprocessing results.\n\n**Business Rules:**\n- Refunds can only be issued for transactions in 'captured' status\n- Partial refunds must not exceed the original transaction amount\n- Refunds cannot be created more than 180 days after the original transaction\n- Maximum of 5 refunds per transaction\n"
+          },
+          "response": [
+            {
+              "id": "407f6599-5c70-40c1-8ec7-ee80f3ef9d3e",
+              "name": "Refund created successfully",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "disabled": false,
+                  "description": {
+                    "content": "URI of the created refund resource",
+                    "type": "text/plain"
+                  },
+                  "key": "Location",
+                  "value": "/refunds/rfnd_abc123def456"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"refundId\": \"rfnd_abc123def456\",\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"status\": \"pending\",\n  \"amount\": 5000,\n  \"currency\": \"USD\",\n  \"refundAmount\": 5000,\n  \"refundCurrency\": \"USD\",\n  \"reason\": \"Customer requested refund\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\",\n  \"updatedAt\": \"2024-01-15T10:30:00Z\",\n  \"estimatedCompletionTime\": \"2024-01-15T14:30:00Z\",\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  },\n  \"links\": {\n    \"self\": \"/refunds/rfnd_abc123def456\",\n    \"status\": \"/refunds/rfnd_abc123def456/status\",\n    \"cancel\": \"/refunds/rfnd_abc123def456/cancel\"\n  }\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-407f6599-5c70-40c1-8ec7-ee80f3ef9d3e"
+            },
+            {
+              "id": "fbe278ba-7257-433e-81ae-60b2f98d2b37",
+              "name": "Bad request - Invalid input or business rule violation",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"INVALID_REFUND_AMOUNT\",\n  \"message\": \"Refund amount exceeds the original transaction amount\",\n  \"details\": {\n    \"transactionId\": \"txn_1234567890abcdef\",\n    \"originalAmount\": 5000,\n    \"requestedRefundAmount\": 6000,\n    \"currency\": \"USD\"\n  },\n  \"code\": \"VALIDATION_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-fbe278ba-7257-433e-81ae-60b2f98d2b37"
+            },
+            {
+              "id": "a080fc15-cfd2-4a50-b13d-f9eaa2af78cb",
+              "name": "Unauthorized - Invalid or missing authentication token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"Authentication token is required\",\n  \"details\": {\n    \"requiredAuth\": \"Bearer token (OAuth 2.0 or JWT)\"\n  },\n  \"code\": \"AUTHENTICATION_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-a080fc15-cfd2-4a50-b13d-f9eaa2af78cb"
+            },
+            {
+              "id": "b005cc7b-17a3-4395-b2a0-c747b84a9ebf",
+              "name": "Transaction not found",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"TRANSACTION_NOT_FOUND\",\n  \"message\": \"The specified transaction was not found\",\n  \"details\": {\n    \"transactionId\": \"txn_invalid123\",\n    \"suggestion\": \"Verify the transaction ID and try again\"\n  },\n  \"code\": \"RESOURCE_NOT_FOUND\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-b005cc7b-17a3-4395-b2a0-c747b84a9ebf"
+            },
+            {
+              "id": "847d9a10-7c65-4720-9282-640226352348",
+              "name": "Conflict - Refund already exists or transaction state conflict",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"DUPLICATE_REFUND\",\n  \"message\": \"A refund with the same parameters already exists for this transaction\",\n  \"details\": {\n    \"transactionId\": \"txn_1234567890abcdef\",\n    \"existingRefundId\": \"rfnd_existing123\",\n    \"conflictType\": \"duplicate_request\"\n  },\n  \"code\": \"CONFLICT\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-847d9a10-7c65-4720-9282-640226352348"
+            },
+            {
+              "id": "67b6bb31-7197-44d5-be95-3ee770ebab98",
+              "name": "Unprocessable entity - Business validation failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"TRANSACTION_TOO_OLD\",\n  \"message\": \"Refunds cannot be issued more than 180 days after the original transaction\",\n  \"details\": {\n    \"transactionId\": \"txn_1234567890abcdef\",\n    \"transactionDate\": \"2023-06-01T00:00:00Z\",\n    \"daysSinceTransaction\": 195,\n    \"maxDaysAllowed\": 180\n  },\n  \"code\": \"BUSINESS_RULE_VIOLATION\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-67b6bb31-7197-44d5-be95-3ee770ebab98"
+            },
+            {
+              "id": "1cca8618-82e6-44f3-99c8-342326d7d7dc",
+              "name": "Too many requests - Rate limit exceeded",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"RATE_LIMIT_EXCEEDED\",\n  \"message\": \"Rate limit exceeded. Please retry after the specified time\",\n  \"details\": {\n    \"limit\": 100,\n    \"window\": \"1 minute\",\n    \"retryAfter\": 45\n  },\n  \"code\": \"RATE_LIMIT_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-1cca8618-82e6-44f3-99c8-342326d7d7dc"
+            },
+            {
+              "id": "7e7b06f0-3955-40fc-93d6-32a2be3b77c2",
+              "name": "Internal server error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"INTERNAL_SERVER_ERROR\",\n  \"message\": \"An unexpected error occurred while processing the refund\",\n  \"details\": {\n    \"requestId\": \"req_abc123def456\",\n    \"suggestion\": \"Please retry the request. If the issue persists, contact support.\"\n  },\n  \"code\": \"SERVER_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-7e7b06f0-3955-40fc-93d6-32a2be3b77c2"
+            },
+            {
+              "id": "d96af16a-d68a-4351-a7f6-5f64ed4d7b16",
+              "name": "Service unavailable - Maintenance or overload",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_1234567890abcdef\",\n  \"amount\": null,\n  \"reason\": \"Customer requested refund\",\n  \"notifyCustomer\": true,\n  \"metadata\": {\n    \"initiatedBy\": \"admin@example.com\",\n    \"ticketNumber\": \"TKT-12345\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ]
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"MAINTENANCE_MODE\",\n  \"message\": \"The service is currently under maintenance\",\n  \"details\": {\n    \"maintenanceWindow\": \"2024-01-15T02:00:00Z - 2024-01-15T04:00:00Z\",\n    \"estimatedCompletion\": \"2024-01-15T04:00:00Z\"\n  },\n  \"code\": \"SERVICE_UNAVAILABLE\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-d96af16a-d68a-4351-a7f6-5f64ed4d7b16"
+            }
+          ],
+          "createdAt": "2026-05-29T18:25:33.000Z",
+          "updatedAt": "2026-05-29T18:25:33.000Z",
+          "uid": "38960911-04d74c94-d743-4ab0-8970-63b0fb0be189"
+        },
+        {
+          "name": "List refunds",
+          "id": "6ce953c0-1105-4742-9634-774b07d23617",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/refunds?transactionId=txn_1234567890abcdef&status=pending&startDate=2024-01-01T00:00:00Z&endDate=2024-01-31T23:59:59Z&page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "refunds"
+              ],
+              "query": [
+                {
+                  "description": "Filter refunds by transaction ID",
+                  "key": "transactionId",
+                  "value": "txn_1234567890abcdef"
+                },
+                {
+                  "description": "Filter refunds by status",
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "description": "Filter refunds created on or after this date",
+                  "key": "startDate",
+                  "value": "2024-01-01T00:00:00Z"
+                },
+                {
+                  "description": "Filter refunds created on or before this date",
+                  "key": "endDate",
+                  "value": "2024-01-31T23:59:59Z"
+                },
+                {
+                  "description": "Page number for pagination (1-based)",
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "description": "Number of items per page",
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Retrieves a paginated list of refunds. Supports filtering by transaction ID,\nstatus, date range, and amount range. Results are sorted by creation date\nin descending order (newest first).\n"
+          },
+          "response": [
+            {
+              "id": "45d23ef0-d365-48c3-8c6a-ce0fc372dbff",
+              "name": "Successful response with refund list",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/refunds?transactionId=txn_1234567890abcdef&status=pending&startDate=2024-01-01T00:00:00Z&endDate=2024-01-31T23:59:59Z&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ],
+                  "query": [
+                    {
+                      "description": "Filter refunds by transaction ID",
+                      "key": "transactionId",
+                      "value": "txn_1234567890abcdef"
+                    },
+                    {
+                      "description": "Filter refunds by status",
+                      "key": "status",
+                      "value": "pending"
+                    },
+                    {
+                      "description": "Filter refunds created on or after this date",
+                      "key": "startDate",
+                      "value": "2024-01-01T00:00:00Z"
+                    },
+                    {
+                      "description": "Filter refunds created on or before this date",
+                      "key": "endDate",
+                      "value": "2024-01-31T23:59:59Z"
+                    },
+                    {
+                      "description": "Page number for pagination (1-based)",
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "description": "Number of items per page",
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"refunds\": [\n    {\n      \"refundId\": \"rfnd_abc123def456\",\n      \"transactionId\": \"txn_1234567890abcdef\",\n      \"status\": \"completed\",\n      \"amount\": 5000,\n      \"currency\": \"USD\",\n      \"refundAmount\": 5000,\n      \"refundCurrency\": \"USD\",\n      \"reason\": \"Customer requested refund\",\n      \"createdAt\": \"2024-01-15T10:30:00Z\",\n      \"completedAt\": \"2024-01-15T14:25:00Z\",\n      \"links\": {\n        \"self\": \"/refunds/rfnd_abc123def456\"\n      }\n    },\n    {\n      \"refundId\": \"rfnd_xyz789ghi012\",\n      \"transactionId\": \"txn_0987654321fedcba\",\n      \"status\": \"pending\",\n      \"amount\": 5000,\n      \"currency\": \"USD\",\n      \"refundAmount\": 2500,\n      \"refundCurrency\": \"USD\",\n      \"reason\": \"Partial refund for damaged item\",\n      \"createdAt\": \"2024-01-15T11:00:00Z\",\n      \"links\": {\n        \"self\": \"/refunds/rfnd_xyz789ghi012\"\n      }\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"pageSize\": 20,\n    \"totalPages\": 3,\n    \"totalItems\": 47,\n    \"hasNext\": true,\n    \"hasPrevious\": false\n  }\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-45d23ef0-d365-48c3-8c6a-ce0fc372dbff"
+            },
+            {
+              "id": "21df3eb6-15ea-479a-92ec-6d95dd609754",
+              "name": "Bad request - Invalid input",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/refunds?transactionId=txn_1234567890abcdef&status=pending&startDate=2024-01-01T00:00:00Z&endDate=2024-01-31T23:59:59Z&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ],
+                  "query": [
+                    {
+                      "description": "Filter refunds by transaction ID",
+                      "key": "transactionId",
+                      "value": "txn_1234567890abcdef"
+                    },
+                    {
+                      "description": "Filter refunds by status",
+                      "key": "status",
+                      "value": "pending"
+                    },
+                    {
+                      "description": "Filter refunds created on or after this date",
+                      "key": "startDate",
+                      "value": "2024-01-01T00:00:00Z"
+                    },
+                    {
+                      "description": "Filter refunds created on or before this date",
+                      "key": "endDate",
+                      "value": "2024-01-31T23:59:59Z"
+                    },
+                    {
+                      "description": "Page number for pagination (1-based)",
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "description": "Number of items per page",
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"VALIDATION_ERROR\",\n  \"message\": \"Invalid request parameters\",\n  \"details\": {\n    \"field\": \"transactionId\",\n    \"issue\": \"Invalid format\"\n  },\n  \"code\": \"VALIDATION_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-21df3eb6-15ea-479a-92ec-6d95dd609754"
+            },
+            {
+              "id": "04dfb2fc-f307-43c5-b212-7998302849f2",
+              "name": "Unauthorized - Invalid or missing authentication",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/refunds?transactionId=txn_1234567890abcdef&status=pending&startDate=2024-01-01T00:00:00Z&endDate=2024-01-31T23:59:59Z&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ],
+                  "query": [
+                    {
+                      "description": "Filter refunds by transaction ID",
+                      "key": "transactionId",
+                      "value": "txn_1234567890abcdef"
+                    },
+                    {
+                      "description": "Filter refunds by status",
+                      "key": "status",
+                      "value": "pending"
+                    },
+                    {
+                      "description": "Filter refunds created on or after this date",
+                      "key": "startDate",
+                      "value": "2024-01-01T00:00:00Z"
+                    },
+                    {
+                      "description": "Filter refunds created on or before this date",
+                      "key": "endDate",
+                      "value": "2024-01-31T23:59:59Z"
+                    },
+                    {
+                      "description": "Page number for pagination (1-based)",
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "description": "Number of items per page",
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"Authentication token is required\",\n  \"code\": \"AUTHENTICATION_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-04dfb2fc-f307-43c5-b212-7998302849f2"
+            },
+            {
+              "id": "a943f68d-6deb-4c26-856c-0380df232a33",
+              "name": "Too many requests - Rate limit exceeded",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/refunds?transactionId=txn_1234567890abcdef&status=pending&startDate=2024-01-01T00:00:00Z&endDate=2024-01-31T23:59:59Z&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ],
+                  "query": [
+                    {
+                      "description": "Filter refunds by transaction ID",
+                      "key": "transactionId",
+                      "value": "txn_1234567890abcdef"
+                    },
+                    {
+                      "description": "Filter refunds by status",
+                      "key": "status",
+                      "value": "pending"
+                    },
+                    {
+                      "description": "Filter refunds created on or after this date",
+                      "key": "startDate",
+                      "value": "2024-01-01T00:00:00Z"
+                    },
+                    {
+                      "description": "Filter refunds created on or before this date",
+                      "key": "endDate",
+                      "value": "2024-01-31T23:59:59Z"
+                    },
+                    {
+                      "description": "Page number for pagination (1-based)",
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "description": "Number of items per page",
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"RATE_LIMIT_EXCEEDED\",\n  \"message\": \"Rate limit exceeded. Please retry after the specified time\",\n  \"details\": {\n    \"limit\": 100,\n    \"window\": \"1 minute\",\n    \"retryAfter\": 45\n  },\n  \"code\": \"RATE_LIMIT_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-a943f68d-6deb-4c26-856c-0380df232a33"
+            },
+            {
+              "id": "d240e65a-7196-4b18-8924-d8e95d1d7f02",
+              "name": "Internal server error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/refunds?transactionId=txn_1234567890abcdef&status=pending&startDate=2024-01-01T00:00:00Z&endDate=2024-01-31T23:59:59Z&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "refunds"
+                  ],
+                  "query": [
+                    {
+                      "description": "Filter refunds by transaction ID",
+                      "key": "transactionId",
+                      "value": "txn_1234567890abcdef"
+                    },
+                    {
+                      "description": "Filter refunds by status",
+                      "key": "status",
+                      "value": "pending"
+                    },
+                    {
+                      "description": "Filter refunds created on or after this date",
+                      "key": "startDate",
+                      "value": "2024-01-01T00:00:00Z"
+                    },
+                    {
+                      "description": "Filter refunds created on or before this date",
+                      "key": "endDate",
+                      "value": "2024-01-31T23:59:59Z"
+                    },
+                    {
+                      "description": "Page number for pagination (1-based)",
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "description": "Number of items per page",
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"error\": \"INTERNAL_SERVER_ERROR\",\n  \"message\": \"An unexpected error occurred\",\n  \"details\": {\n    \"requestId\": \"req_abc123def456\"\n  },\n  \"code\": \"SERVER_ERROR\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-d240e65a-7196-4b18-8924-d8e95d1d7f02"
+            }
+          ],
+          "createdAt": "2026-05-29T18:25:33.000Z",
+          "updatedAt": "2026-05-29T18:25:33.000Z",
+          "uid": "38960911-6ce953c0-1105-4742-9634-774b07d23617"
+        }
+      ],
+      "id": "a6df8d02-5b3a-4bfe-92c4-64d8a91428c8",
+      "createdAt": "2026-05-29T18:25:32.000Z",
+      "updatedAt": "2026-05-29T18:25:32.000Z",
+      "uid": "38960911-a6df8d02-5b3a-4bfe-92c4-64d8a91428c8"
+    },
+    {
+      "name": "health",
+      "item": [
+        {
+          "name": "Health check",
+          "id": "68a9060f-e4ed-46ae-b071-51dbe704fb2e",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Returns the health status of the refund service. Useful for monitoring\nand load balancer health checks.\n"
+          },
+          "response": [
+            {
+              "id": "76297aca-520e-48ca-960f-7a4f521297bb",
+              "name": "Service is healthy",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"status\": \"healthy\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\",\n  \"version\": \"2.1.0\",\n  \"services\": {\n    \"database\": \"operational\",\n    \"paymentGateway\": \"operational\",\n    \"notificationService\": \"operational\"\n  }\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-76297aca-520e-48ca-960f-7a4f521297bb"
+            },
+            {
+              "id": "8e4dfada-5903-4140-a74b-51244210d86b",
+              "name": "Service is unhealthy",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "responseTime": null,
+              "body": "{\n  \"status\": \"unhealthy\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\",\n  \"version\": \"2.1.0\",\n  \"services\": {\n    \"database\": \"down\",\n    \"paymentGateway\": \"down\",\n    \"notificationService\": \"operational\"\n  }\n}",
+              "createdAt": "2026-05-29T18:25:33.000Z",
+              "updatedAt": "2026-05-29T18:25:33.000Z",
+              "uid": "38960911-8e4dfada-5903-4140-a74b-51244210d86b"
+            }
+          ],
+          "createdAt": "2026-05-29T18:25:33.000Z",
+          "updatedAt": "2026-05-29T18:25:33.000Z",
+          "uid": "38960911-68a9060f-e4ed-46ae-b071-51dbe704fb2e"
+        }
+      ],
+      "id": "122f1d66-e397-44e0-8deb-470b40ab4778",
+      "createdAt": "2026-05-29T18:25:32.000Z",
+      "updatedAt": "2026-05-29T18:25:32.000Z",
+      "uid": "38960911-122f1d66-e397-44e0-8deb-470b40ab4778"
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "scope",
+        "value": "refunds:read refunds:write refunds:admin",
+        "type": "string"
+      },
+      {
+        "key": "accessTokenUrl",
+        "value": "https://auth.example.com/oauth2/token",
+        "type": "string"
+      },
+      {
+        "key": "authUrl",
+        "value": "https://auth.example.com/oauth2/authorize",
+        "type": "string"
+      },
+      {
+        "key": "grant_type",
+        "value": "authorization_code",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.payments.example.com/v2",
+      "type": "any"
+    }
+  ]
+}
