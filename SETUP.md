@@ -269,7 +269,7 @@ Confirm **all six** items:
 | # | Check | What you should see |
 |---|---|---|
 | 1 | Workspace exists | Sidebar entry, name starts with `[PMT]` |
-| 2 | Spec in Spec Hub | APIs section → "Payment Processing API - Refund Service" v2.1.0 renders |
+| 2 | Spec in Spec Hub | APIs section → "Payment Processing API - Refund Service" v2.1.1 renders |
 | 3 | Three collections | `[Baseline]`, `[Contract]`, `[Smoke]` payment-refund-service — each opens to show `refunds` and `health` folders with populated requests |
 | 4 | Four environments | Environments section: `prod`, `uat`, `qa`, `dev` |
 | 5 | Mock server | Mock Servers section shows one mock |
